@@ -25,9 +25,7 @@ test("test", async ({ page }) => {
   await page.getByRole("textbox", { name: "xxxxxxx" }).press("Enter");
   await page.locator('button.fd-shellbar__button--menu').click();
   await page.locator("a").filter({ hasText: "نویگیتور" }).click();
-  await expect(
-    page.getByRole("button", { name: "Product Switch" }),
-  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'App Launcher' })).toBeVisible();
   await page.getByRole("heading", { name: "نمایش گروهی اپ ها دیالوگ" }).click();
   await expect(
     page.getByRole("heading", { name: "دانلود فایل در موبایل" }),

@@ -21,7 +21,7 @@ test('بررسی لود شدن آخرین عکس با استفاده از اسن
     await page.getByRole("button", { name: "ورود" }).click();
     await page.locator('.fd-avatar__icon').click();
     await page.getByRole('menuitem', { name: 'نویگیتور' }).click();
-    await page.getByRole('button', { name: 'Product Switch' }).click();
+    await page.getByRole('button', { name: 'App Launcher' }).click();
     await page.getByText('ثبت درخواست ایشوها').last().click();
     await page.getByRole('link', { name: '3901' }).last().click();
     await page.getByRole('link', { name: '‫*حذف نشود*‬' }).dblclick();

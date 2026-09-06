@@ -17,7 +17,7 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'xxxxxxx' }).press('Enter');
   await page.locator('button.fd-shellbar__button--menu').click();
   await page.locator('a').filter({ hasText: 'نویگیتور' }).click();
-  await page.getByRole('button', { name: 'Product Switch' }).click();
+  await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.locator('#cdk-overlay-1').getByText('ثبت درخواست ایشوها').click();
   await page.getByRole('link', { name: '4000' }).last().click();
   await page.waitForTimeout(500);

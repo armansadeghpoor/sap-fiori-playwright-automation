@@ -40,16 +40,12 @@ test("test", async ({ page }) => {
   ).toBeVisible();
   await page.locator('button.fd-shellbar__button--menu').click();
   await page.locator("a").filter({ hasText: "نویگیتور" }).click();
-  await expect(
-    page.getByRole("button", { name: "Product Switch" }),
-  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'App Launcher' })).toBeVisible();
   await page.getByRole("heading", { name: "3864" }).last().click();
   await page.getByRole("button", { name: "ذخیره", exact: true }).click();
   await page.waitForTimeout(1000);
   await page.getByTitle('Close').click();
-  await expect(
-    page.getByRole("button", { name: "Product Switch" }),
-  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'App Launcher' })).toBeVisible();
   await expect(
     page.getByRole("tab", { name: "تست مخصوص وب جدید - تایل" }),
   ).toBeVisible();

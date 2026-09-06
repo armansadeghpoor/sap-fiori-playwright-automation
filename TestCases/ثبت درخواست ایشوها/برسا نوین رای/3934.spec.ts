@@ -14,7 +14,7 @@ test('test', async ({ page }) => {
   const mainMenuButton = page.locator('button.fd-shellbar__button--menu');
   await mainMenuButton.click();
   await page.getByRole('menuitem', { name: 'صفحه اصلی' }).nth(1).click();
-  await page.getByRole('button', { name: 'Product Switch' }).click();1
+  await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.locator('#cdk-overlay-1').getByText('ثبت درخواست ایشوها').click();
   await page.getByRole('link', { name: '3934' }).last().click();
   await page.getByText('‫*حذف نشود*‬').dblclick();
