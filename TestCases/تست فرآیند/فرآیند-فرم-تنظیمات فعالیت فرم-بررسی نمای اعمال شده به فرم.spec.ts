@@ -1,0 +1,34 @@
+import { test, expect } from "@playwright/test";
+
+test("test", async ({ page }) => {
+  await page.goto("http://localhost:8000/#/login");
+  await page
+    .locator("bsu-layout-control")
+    .filter({ hasText: "نام کاربری*" })
+    .getByRole("textbox")
+    .click();
+  await page
+    .locator("bsu-layout-control")
+    .filter({ hasText: "نام کاربری*" })
+    .getByRole("textbox")
+    .fill("کاربر1");
+  await page
+    .locator("bsu-layout-control")
+    .filter({ hasText: "نام کاربری*" })
+    .getByRole("textbox")
+    .press("Tab");
+  await page.getByRole("textbox", { name: "xxxxxxx" }).fill("123");
+  await page.getByRole("button", { name: "ورود" }).click();
+  await page.getByRole("button", { name: "Navigation" }).click();
+  await page.getByText("تست فرآیند").click();
+  await page.getByText("اجرای فرآیندها").click();
+  await page.getByText("فرم-بررسی نمای اعمال شده به فرم").click();
+  await expect(page.locator("fd-layout-grid")).toMatchAriaSnapshot(`
+    - heading "نما1" [level=5]
+    - region:
+      - text: "سن:"
+      - textbox
+      - text: "نام:"
+      - textbox
+    `);
+});

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    // "target": "ESNext",
+    "target": "es2016",
+    "module": "commonjs",
+    "strict": true,
+    "paths": {
+      "barrier": ["./Utils/barrier"] 
+    },
+    // "baseUrl": ".",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  }
+}

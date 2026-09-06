@@ -1,0 +1,18 @@
+{
+  "name": "newweb-uitest",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "codegen": "playwright codegen --viewport-size=1920,950 --load-storage=localstorage.json http://localhost:8000",
+    "codegen:mobile": "playwright codegen --device=\"Pixel 7\" --load-storage=localstorage.json http://localhost:8000",
+    "codegen:iphone": "playwright codegen --device=\"iPhone 15 Pro Max\" --load-storage=localstorage.json http://localhost:8000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^24.13.3"
+  }
+}
