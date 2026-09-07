@@ -13,7 +13,7 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'xxxxxxx' }).fill('123');
   await page.getByRole('button', { name: 'ورود' }).click();
   await page.getByRole('tab', { name: 'تست موبایل-تایل default' }).click();
-  await page.getByRole('heading', { name: '4005' }).last().click();
+  await page.getByRole('heading', { name: '4005' }).last().dblclick();
   await expect(page.getByRole('button', { name: 'نمایش دکمه فرآیندی در مودال' })).toBeVisible();
   await expect(page.getByRole('banner')).toContainText('');
   await expect(page.getByText('عنوان:')).toBeVisible();

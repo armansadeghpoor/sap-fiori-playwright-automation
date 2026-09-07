@@ -30,7 +30,7 @@ test("test", async ({ page }) => {
   await page.getByRole("textbox", { name: "xxxxxxx" }).press("Enter");
   await page.locator('.fd-avatar__icon').click();
   await page.getByRole('menuitem', { name: 'نویگیتور' }).click();
-  await page.getByRole('button', { name: 'Product Switch' }).click();
+  await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.locator('#cdk-overlay-1').getByText('ثبت درخواست ایشوها').click();
   await page.getByRole('link', { name: '4069' }).last().click();
   await page.getByRole('button', { name: 'جدید' }).click();
@@ -45,7 +45,7 @@ test("test", async ({ page }) => {
   await page.locator('button.fd-list__button:has(.sap-icon--slim-arrow-left)').first().click();
   await page.waitForTimeout(500);
   await expect(page.locator('bsu-ui-tree')).toContainText('تست 1تست 1.1تست 1.1.1تست 1.2تست 2تست 2.1تست 2.2تست 2.2.1تست 3');
-  await page.getByRole('button', { name: 'close' }).click();
+  await page.getByRole('button', { name: 'close' }).last().click();
   await page.getByRole('combobox', { name: 'انتخاب کنید' }).click();
   await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
   await expect(page.locator('fd-layout-grid')).toContainText('عنوان:رابطه تکی-گزارش از نوع سلسله مراتبی: 3 result list items');

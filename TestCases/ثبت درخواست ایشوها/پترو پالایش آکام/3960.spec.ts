@@ -17,7 +17,7 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'xxxxxxx' }).press('Enter');
   await page.locator('.fd-avatar__icon').click();
   await page.getByRole('menuitem', { name: 'نویگیتور' }).click();
-  await page.getByRole('button', { name: 'Product Switch' }).click();
+  await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.getByText('ثبت درخواست ایشوها').last().click();
   await page.getByRole('link', { name: '3960' }).last().click();
   await page.getByRole('button', { name: 'جدید' }).click();
