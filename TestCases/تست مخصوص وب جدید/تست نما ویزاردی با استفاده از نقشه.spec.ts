@@ -38,7 +38,7 @@ test("test", async ({ page }) => {
   await expect(page.getByText("تاریخ شروع:")).toBeVisible();
   await page.waitForTimeout(1000);
   await page.getByRole("button", { name: "arrow left" }).click();
-  await page.getByRole("button", { name: "Select Options" }).click();
+  await page.getByRole('combobox', { name: 'Select an Option' }).click();
   await page.getByText("دانشگاه").click();
   await page.getByRole("button", { name: "جدید" }).click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
