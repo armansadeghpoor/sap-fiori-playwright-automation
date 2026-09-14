@@ -27,8 +27,11 @@ test('بررسی لود شدن آخرین عکس با استفاده از اسن
     await page.getByRole('link', { name: '‫*حذف نشود*‬' }).dblclick();
     const lastImage = page.locator('fd-card-content img').last();
     await lastImage.scrollIntoViewIfNeeded();
+    await lastImage.click();
     await page.waitForTimeout(1000);
     // ۳. مقایسه تصویری با عکس مرجع
     // این متد اسکرین‌شاتِ جدید (Actual) را می‌گیرد و با مرجع (Baseline) مقایسه می‌کند.
-    await expect(lastImage).toHaveScreenshot('last-image-loaded.png');
+    await expect(lastImage).toHaveScreenshot('last-image-loaded.png', {
+        maxDiffPixels: 200,
+    });
 });

@@ -27,11 +27,7 @@ test("test", async ({ page }) => {
   await page.getByText("تست وب جدید").click();
   await page.getByText("تست نمای چندصفحه ای").click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await expect(page.getByRole("button", { name: "بیشتر " })).toBeVisible();
-  await page.getByRole("button", { name: "بیشتر " }).click();
-  // await page
-  //   .locator("#cdk-overlay-1")
-  //   .getByText("گزارش مرتبط 2 default")
-  //   .click();
+  await expect(page.getByRole('button', { name: 'بیشتر' })).toBeVisible();
+  await page.getByRole('button', { name: 'بیشتر' }).click();
   await page.locator('#cdk-overlay-0').getByText('گزارش مرتبط 2 default').click();
 });

@@ -21,5 +21,5 @@ test('test', async ({ page }) => {
   await page.getByText('تست مخصوص وب جدید', { exact: true }).click();
   await page.getByRole('link', { name: 'نمایش لیست تصاویر-کامپوننت و بدون کامپوننت' }).last().click();
   await page.getByRole('link', { name: '‫*حذف نشود*‬' }).dblclick();
-  await expect(page.locator('#fd-toolbar-10')).toContainText('دانلود اسکن پیوست فایل بزرگنمایی کوچک نمایی چرخش حذف انتقال به بالا انتقال به پایین تمام صفحه چاپ دریافت فایل');
+  await expect(page.locator('#fd-toolbar-12')).toContainText('دانلود صفحهٔ فعال اسکن پیوست فایل بزرگ‌نمایی صفحهٔ فعال کوچک‌نمایی صفحهٔ فعال چرخش صفحهٔ فعال حذف انتخاب‌شده‌ها حذف همه Negative Action');
 });

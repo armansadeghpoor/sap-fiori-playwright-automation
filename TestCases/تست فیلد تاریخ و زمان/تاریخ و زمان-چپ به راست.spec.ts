@@ -37,7 +37,11 @@ test("test", async ({ page }) => {
     page.getByRole("textbox", { name: "YYYY/MM/DD HH:mm" })
   ).toBeVisible();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
-  await page.getByRole("button", { name: "" }).click();
+  // await page.getByRole('link', { name: '‫1405/06/23 10:23‬' }).dblclick();
+
+  await page.locator('bsu-barsa-row-inline-actionlist').getByRole("button").first().click();
+
+
   await expect(
     page.getByRole("textbox", { name: "YYYY/MM/DD HH:mm" })
   ).toBeVisible();

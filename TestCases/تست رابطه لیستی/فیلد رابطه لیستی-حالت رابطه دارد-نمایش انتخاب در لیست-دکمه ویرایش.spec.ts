@@ -29,8 +29,9 @@ test("test", async ({ page }) => {
   await page.getByRole("button", { name: "جدید" }).click();
   await expect(page.locator("tbody")).toContainText("‫سفید2‬");
   await page.locator('bsu-barsa-table-row:nth-child(4) > .cdk-drag > td > .tw-flex > .ng-untouched > .fd-checkbox__label > .fd-checkbox__checkmark').click();
-  // await page.getByRole("button", { name: "" }).first().click();
-  await page.getByRole("textbox", { name: "سفید" }).click();
+  // await page.getByRole("textbox", { name: "2سفید" }).click();
+
+  await page.getByRole('link', { name: '‫سفید2‬' }).dblclick();
   await page.getByRole("textbox", { name: "سفید" }).fill("سفید تستی");
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await expect(page.locator("tbody")).toContainText("‫سفید تستی‬");

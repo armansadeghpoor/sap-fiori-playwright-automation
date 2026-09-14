@@ -26,27 +26,18 @@ test("test", async ({ page }) => {
   await page.locator('button.fd-shellbar__button--menu').click();
   await page.locator("a").filter({ hasText: "نویگیتور" }).click();
   await page.getByRole('button', { name: 'App Launcher' }).click();
-  await page
-    .getByRole("listitem")
-    .filter({ hasText: "سیستم تست کاربرانتست کاربران" })
-    .click();
+  await page.getByText('سیستم تست کاربران').click();
   await page.locator("#headerCollapse").click();
   await page.getByRole('button', { name: 'App Launcher' }).click();
-  await expect(
-    page
-      .getByRole("listitem")
-      .filter({ hasText: "سیستم تست کاربرانتست کاربران" }),
-  ).toHaveClass(/selected/);
+  await expect(page.getByRole('menuitem', { name: 'سیستم تست کاربران' })).toHaveClass(/selected/);
   await page.getByText("تست کد").click();
   await page.locator("#headerCollapse").click();
   await page.getByRole('button', { name: 'App Launcher' }).click();
-  await page
-    .getByRole("listitem")
-    .filter({ hasText: "تست کدکدنویسی وب" })
-    .click();
+  await page.getByText('سیستم تست کاربران', { exact: true }).click();
+  await page.getByText('کدنویسی وب').click();
   await page.locator("#headerCollapse").click();
   await page.getByRole('button', { name: 'App Launcher' }).click();
   await expect(
-    page.getByRole("listitem").filter({ hasText: "تست کدکدنویسی وب" }),
+    page.getByRole('menuitem', { name: 'تست کد' })
   ).toHaveClass(/selected/);
 });

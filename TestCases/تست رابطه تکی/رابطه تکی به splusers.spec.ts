@@ -24,10 +24,7 @@ test("test", async ({ page }) => {
     .getByRole("textbox")
     .press("Tab");
   await page.getByRole("textbox", { name: "xxxxxxx" }).fill("123");
-  await page
-    .locator("bsu-ui-button")
-    .filter({ hasText: /^ورود$/ })
-    .click();
+  await page.getByRole('button', { name: 'ورود' }).click();
   await page.getByRole("button", { name: "Navigation" }).click();
   await page.getByText("تست فیلد").click();
   await page.getByText("فیلد های رابطه ای").click();

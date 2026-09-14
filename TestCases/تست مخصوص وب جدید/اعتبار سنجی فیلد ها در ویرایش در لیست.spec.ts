@@ -26,9 +26,9 @@ test("test", async ({ page }) => {
   await page.keyboard.press("Control+A");
   await page.keyboard.press("Backspace");
   await page.getByRole("textbox").fill("15");
-  await page.getByRole('button', { name: 'ویرایش در لیست' }).click();
-  await page.getByRole('button', { name: 'ویرایش در لیست' }).click();
-  await page.getByRole('button', { name: 'ویرایش در لیست' }).click();
+  await page.getByTitle('ویرایش در لیست').click();
+  await page.getByTitle('ویرایش در لیست').click();
+  await page.getByTitle('ویرایش در لیست').click();
   await expect(
     page.getByText(
       "اشکال در مقادیر فرم تعداد: مقدار ورودی `تعداد` نمی تواند کمتر از 18 باشد"
