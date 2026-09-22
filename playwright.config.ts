@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import { environment } from "./framework/config/environment";
 
 export default defineConfig({
   testDir: "./TestCases",
@@ -15,6 +16,7 @@ export default defineConfig({
   reporter: "html",
 
   use: {
+    baseURL: environment.baseUrl,
     storageState: "localstorage.json",
     trace: "on-first-retry",
     viewport: null,
