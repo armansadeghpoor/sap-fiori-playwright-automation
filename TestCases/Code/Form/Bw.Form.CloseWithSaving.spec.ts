@@ -4,7 +4,7 @@ test("test", async ({ page }) => {
   await page.goto(
     "http://localhost:5126/api2/ModernWebTest/0.1/RestoreSnapshot"
   );
-  await page.goto("http://localhost:8000/#/login");
+  await page.goto("/#/login");
   await page.waitForTimeout(2000);
   await page.reload();
   await page
