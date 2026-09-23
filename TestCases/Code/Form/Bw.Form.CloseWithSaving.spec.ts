@@ -1,9 +1,8 @@
 import { test, expect } from "@playwright/test";
+import { restoreSnapshot } from "../../../framework/api/environment.api";
 
-test("test", async ({ page }) => {
-  await page.goto(
-    "http://localhost:5126/api2/ModernWebTest/0.1/RestoreSnapshot"
-  );
+test("test", async ({ page, request }) => {
+  await restoreSnapshot(request);
   await page.goto("/#/login");
   await page.waitForTimeout(2000);
   await page.reload();
