@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { loginAs } from '../../../framework/auth/auth.service';
+import { users } from '../../../framework/auth/users';
 
 test.use({
   storageState: 'localstorage.json',
@@ -10,12 +12,7 @@ test.use({
 
 // ⭐️ نکته مهم: کلمه context را اینجا در کنار page اضافه کن
 test('test', async ({ page, context }) => {
-  await page.goto('http://localhost:8000/#/login');
-  await page.locator('bsu-layout-control').filter({ hasText: 'نام کاربری*' }).getByRole('textbox').click();
-  await page.locator('bsu-layout-control').filter({ hasText: 'نام کاربری*' }).getByRole('textbox').fill('راهبر');
-  await page.locator('bsu-layout-control').filter({ hasText: 'نام کاربری*' }).getByRole('textbox').press('Tab');
-  await page.getByRole('textbox', { name: 'xxxxxxx' }).fill('123');
-  await page.getByRole('textbox', { name: 'xxxxxxx' }).press('Enter');
+  await loginAs(page, users.rahbar);
 
   await page.locator('button.fd-shellbar__button--menu').click();
   await page.locator('a').filter({ hasText: 'نویگیتور' }).click();

@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { loginAs } from '../../../framework/auth/auth.service';
+import { users } from '../../../framework/auth/users';
 
 test.use({
   storageState: 'localstorage.json'
@@ -6,14 +8,7 @@ test.use({
 
 // 💡 دقت کن: کلمه context را حتماً باید به اینجا اضافه کنی
 test('test', async ({ page, context }) => {
-  await page.goto('http://localhost:8000/#/login');
-
-  // فرآیند لاگین
-  await page.locator('bsu-layout-control').filter({ hasText: 'نام کاربری*' }).getByRole('textbox').click();
-  await page.locator('bsu-layout-control').filter({ hasText: 'نام کاربری*' }).getByRole('textbox').fill('راهبر');
-  await page.locator('bsu-layout-control').filter({ hasText: 'نام کاربری*' }).getByRole('textbox').press('Tab');
-  await page.getByRole('textbox', { name: 'xxxxxxx' }).fill('123');
-  await page.getByRole('textbox', { name: 'xxxxxxx' }).press('Enter');
+  await loginAs(page, users.rahbar);
 
   await page.getByRole('heading', { name: 'پریدن صفحه بندی بعد از رفرش' }).click();
 

@@ -1,4 +1,6 @@
 import { test, expect, devices } from '@playwright/test';
+import { loginAs } from '../../../framework/auth/auth.service';
+import { users } from '../../../framework/auth/users';
 test.setTimeout(60000);
 test.use({
   ...devices['Pixel 7'],
@@ -6,12 +8,7 @@ test.use({
 });
 
 test('test', async ({ page }) => {
-  await page.goto('http://localhost:8000/#/login');
-  await page.locator('bsu-layout-control').filter({ hasText: 'نام کاربری*' }).getByRole('textbox').click();
-  await page.locator('bsu-layout-control').filter({ hasText: 'نام کاربری*' }).getByRole('textbox').fill('راهبر');
-  await page.getByRole('textbox', { name: 'xxxxxxx' }).click();
-  await page.getByRole('textbox', { name: 'xxxxxxx' }).fill('123');
-  await page.getByRole('button', { name: 'ورود' }).click();
+  await loginAs(page, users.rahbar);
   await page.locator('.fd-avatar__icon').click();
   await page.getByRole('menuitem', { name: 'نویگیتور' }).click();
   await page.waitForTimeout(700);
