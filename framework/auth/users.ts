@@ -4,6 +4,7 @@ interface UserRegistry {
   readonly rahbar: TestUser;
   readonly user1: TestUser;
   readonly user2: TestUser;
+  readonly kartable: TestUser;
 }
 
 export const users: UserRegistry = Object.freeze({
@@ -18,5 +19,9 @@ export const users: UserRegistry = Object.freeze({
   user2: Object.freeze({
     username: process.env.USER2_USERNAME ?? "کاربر2",
     password: process.env.USER2_PASSWORD ?? "123",
+  }),
+  kartable: Object.freeze({
+    username: process.env.KARTABLE_USERNAME ?? "کارتابل",
+    password: process.env.KARTABLE_PASSWORD ?? "123",
   }),
 });
