@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { restoreSnapshot } from '../../framework/api/environment.api';
+import { loginAs } from '../../framework/auth/auth.service';
+import { users } from '../../framework/auth/users';
 
 test.use({
   storageState: 'localstorage.json',
@@ -8,18 +11,9 @@ test.use({
   }
 });
 
-test('test', async ({ page }) => {
-  await page.goto(
-    "http://localhost:5126/api2/ModernWebTest/0.1/RestoreSnapshot"
-  );
-  await page.goto('http://localhost:8000/#/login');
-  await page.waitForTimeout(2000);
-  await page.reload();
-  await page.locator('input[type="text"]').click();
-  await page.locator('input[type="text"]').fill('راهبر');
-  await page.locator('input[type="text"]').press('Tab');
-  await page.getByRole('textbox', { name: 'xxxxxxx' }).fill('123');
-  await page.getByRole('textbox', { name: 'xxxxxxx' }).press('Enter');
+test('test', async ({ page, request }) => {
+  await restoreSnapshot(request);
+  await loginAs(page, users.rahbar);
   await page.locator('.fd-avatar__icon').click();
   await page.getByRole('menuitem', { name: 'نویگیتور' }).click();
   await page.getByRole('button', { name: 'App Launcher' }).click();
