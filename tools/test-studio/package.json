@@ -1,15 +1,15 @@
 {
   "name": "playwright-test-studio",
   "displayName": "Playwright Test Studio",
-  "description": "Local sidebar for the project's existing test generator and recorder.",
-  "version": "0.1.2",
+  "description": "Local test recording and regression execution with durable run history.",
+  "version": "0.2.2",
   "publisher": "newweb-local",
   "private": true,
   "engines": { "vscode": "^1.85.0" },
   "categories": ["Testing"],
   "extensionKind": ["workspace"],
   "main": "./extension.cjs",
-  "activationEvents": ["onView:playwrightTestStudio.form"],
+  "activationEvents": ["onView:playwrightTestStudio.form", "onView:playwrightTestStudio.regression"],
   "capabilities": {
     "untrustedWorkspaces": { "supported": false, "description": "Executes the workspace's generator and recorder." },
     "virtualWorkspaces": { "supported": false }
@@ -19,9 +19,15 @@
       "activitybar": [{ "id": "playwrightTestStudio", "title": "Playwright Test Studio", "icon": "media/studio.svg" }]
     },
     "views": {
-      "playwrightTestStudio": [{ "type": "webview", "id": "playwrightTestStudio.form", "name": "ساخت تست جدید" }]
+      "playwrightTestStudio": [
+        { "type": "webview", "id": "playwrightTestStudio.regression", "name": "Regression Execution Manager" },
+        { "type": "webview", "id": "playwrightTestStudio.form", "name": "ساخت تست جدید" }
+      ]
     },
-    "commands": [{ "command": "playwrightTestStudio.open", "title": "Playwright Test Studio: Open" }],
+    "commands": [
+      { "command": "playwrightTestStudio.open", "title": "Playwright Test Studio: Open" },
+      { "command": "playwrightTestStudio.regression.open", "title": "Playwright Test Studio: Regression" }
+    ],
     "configuration": {
       "title": "Playwright Test Studio",
       "properties": {

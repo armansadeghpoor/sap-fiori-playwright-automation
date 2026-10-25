@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { Studio, nodePath, runJson, readableError, relativeFolder } = require("./studio.cjs");
+const { RegressionView } = require("./regression/view.cjs");
 
 function projectRoot() {
   if (!vscode.workspace.isTrusted) throw new Error("ابتدا Workspace Trust را برای این پروژه فعال کنید.");
@@ -14,13 +15,13 @@ function projectRoot() {
   return candidates[0].uri.fsPath;
 }
 
-function renderHtml(webview, extensionUri) {
+function renderHtml(webview, extensionUri, name = "studio") {
   const nonce = crypto.randomBytes(24).toString("hex");
   const resource = name => webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "media", name));
-  const template = fs.readFileSync(path.join(extensionUri.fsPath, "media", "studio.html"), "utf8");
+  const template = fs.readFileSync(path.join(extensionUri.fsPath, "media", name + ".html"), "utf8");
   return template.replaceAll("{{nonce}}", nonce).replaceAll("{{cspSource}}", webview.cspSource)
-    .replaceAll("{{script}}", resource("studio.js").toString())
-    .replaceAll("{{style}}", resource("studio.css").toString());
+    .replaceAll("{{script}}", resource(name + ".js").toString())
+    .replaceAll("{{style}}", resource(name + ".css").toString());
 }
 
 class StudioProvider {
@@ -153,14 +154,17 @@ class StudioProvider {
   }
 }
 
-let provider;
+let provider, regression;
 function activate(context) {
   provider = new StudioProvider(context);
+  regression = new RegressionView(context, vscode, { root: projectRoot, node: provider.node, render: renderHtml });
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider("playwrightTestStudio.form", provider),
+    vscode.window.registerWebviewViewProvider("playwrightTestStudio.regression", regression),
+    vscode.commands.registerCommand("playwrightTestStudio.regression.open", () => vscode.commands.executeCommand("playwrightTestStudio.regression.focus")),
     vscode.commands.registerCommand("playwrightTestStudio.open", () => vscode.commands.executeCommand("workbench.view.extension.playwrightTestStudio")),
     vscode.workspace.onDidChangeWorkspaceFolders(() => void provider.initialize()));
-  return { provider };
+  return { provider, regression };
 }
-async function deactivate() { if (provider) await provider.shutdown(); }
+async function deactivate() { await Promise.all([provider?.shutdown(), regression?.shutdown()]); }
 module.exports = { activate, deactivate };

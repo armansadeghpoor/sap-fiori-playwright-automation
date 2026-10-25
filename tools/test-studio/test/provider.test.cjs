@@ -1,7 +1,9 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const Module = require("node:module");
-const { fixture, cleanup } = require("./fixture.cjs");
+const { fixture, cleanup, withRunner } = require("./fixture.cjs");
+const fs = require("node:fs");
+const path = require("node:path");
 const root = fixture();
 let dirty = true, saves = 0, canSave = true, source = "", notices = 0;
 const metadata = new Map();
@@ -25,7 +27,7 @@ try {
   Module._load = function (name, ...args) { return name === "vscode" ? vscode : load.call(this, name, ...args); };
   ({ activate } = require("../extension.cjs"));
 } finally { Module._load = load; }
-const { provider } = activate({ subscriptions: [], workspaceState: {
+const { provider, regression } = activate({ subscriptions: [], workspaceState: {
   get: key => metadata.get(key), update: async (key, value) => metadata.set(key, value),
 } });
 test.after(() => cleanup(root));
@@ -77,4 +79,26 @@ test("run stop has no recording-copy dialog and target metadata excludes consent
   const target = { root, specPath: "target.spec.ts", snapshot: true };
   await provider.studio.host.rememberTarget(target);
   assert.deepEqual(metadata.get("lastSpec"), target);
+});
+
+test("report and artifact actions use the selected archived run and literal CLI arguments", async () => {
+  withRunner(root);
+  const store = regression.manager.store();
+  const run = store.create({ tests: [], scope: "file" });
+  fs.mkdirSync(path.join(run.folder, "report"));
+  fs.writeFileSync(path.join(run.folder, "report", "index.html"), "<h1>Report fixture</h1>");
+  fs.writeFileSync(path.join(run.folder, "note.txt"), "artifact");
+  const terminals = [], opened = [], messages = [];
+  vscode.window.createTerminal = options => { terminals.push(options); return { show() {} }; };
+  vscode.commands.executeCommand = async (...args) => opened.push(args);
+  regression.send = value => messages.push(value);
+  await regression.handle({ type: "openReport", id: run.manifest.id });
+  assert.equal(terminals.length, 1);
+  assert.deepEqual(terminals[0].shellArgs.slice(1), ["show-report", path.join(run.folder, "report"), "--host=127.0.0.1", "--port=0"]);
+  await regression.handle({ type: "openArtifact", id: run.manifest.id, path: "note.txt" });
+  assert.equal(opened.at(-1)[0], "vscode.open");
+  assert.equal(opened.at(-1)[1].fsPath, path.join(run.folder, "note.txt"));
+  await regression.handle({ type: "openArtifact", id: run.manifest.id, path: "../../../../outside" });
+  assert.equal(messages.at(-1).type, "error");
+  assert.equal(opened.length, 1);
 });

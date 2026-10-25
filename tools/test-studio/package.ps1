@@ -5,7 +5,7 @@ $manifest = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'package.json') -R
 $outputFolder = [IO.Path]::GetFullPath($OutputDirectory)
 [IO.Directory]::CreateDirectory($outputFolder) | Out-Null
 $outputFile = Join-Path $outputFolder ("playwright-test-studio-{0}.vsix" -f $manifest.version)
-$files = @('package.json', 'extension.cjs', 'studio.cjs', 'README.md', 'media/studio.svg', 'media/studio.html', 'media/studio.css', 'media/studio.js')
+$files = @('package.json', 'extension.cjs', 'studio.cjs', 'README.md', 'media/studio.svg', 'media/studio.html', 'media/studio.css', 'media/studio.js', 'media/regression.html', 'media/regression.css', 'media/regression.js', 'regression/history.cjs', 'regression/reporter.cjs', 'regression/manager.cjs', 'regression/view.cjs')
 foreach ($file in $files) {
   if (-not (Test-Path -LiteralPath (Join-Path $PSScriptRoot $file) -PathType Leaf)) { throw "Missing package file: $file" }
 }
