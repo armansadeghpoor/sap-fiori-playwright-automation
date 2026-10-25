@@ -8,7 +8,8 @@ node_modules/
 .env
 localstorage.json
 *.log
-.vscode/
+.vscode/*
+!.vscode/tasks.json
 *.docx
 *.pdf
 *.png

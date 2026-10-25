@@ -3,16 +3,20 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "codegen": "playwright codegen --viewport-size=1920,950 --load-storage=localstorage.json http://localhost:8000",
-    "codegen:mobile": "playwright codegen --device=\"Pixel 7\" --load-storage=localstorage.json http://localhost:8000",
-    "codegen:iphone": "playwright codegen --device=\"iPhone 15 Pro Max\" --load-storage=localstorage.json http://localhost:8000"
+    "record": "node tools/recorder/launch.cjs",
+    "record:snapshot": "node tools/recorder/launch.cjs --snapshot",
+    "record:mobile": "node tools/recorder/launch.cjs --device=pixel-7",
+    "record:mobile:snapshot": "node tools/recorder/launch.cjs --device=pixel-7 --snapshot",
+    "record:iphone": "node tools/recorder/launch.cjs --device=iphone-15-pro-max",
+    "record:iphone:snapshot": "node tools/recorder/launch.cjs --device=iphone-15-pro-max --snapshot",
+    "new:test": "node tools/new-test.cjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@playwright/test": "^1.62.1",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^24.13.3"
   }
 }

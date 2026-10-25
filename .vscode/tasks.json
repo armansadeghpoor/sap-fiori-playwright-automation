@@ -1,0 +1,77 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "New Playwright Test",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/tools/new-test.cjs",
+        "--name",
+        "${input:testName}",
+        "--path",
+        "${input:testPath}",
+        "--user",
+        "${input:userProfile}",
+        "--device",
+        "${input:deviceProfile}",
+        "--snapshot",
+        "${input:snapshotMode}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "testName",
+      "type": "promptString",
+      "description": "Test name (Persian or English)"
+    },
+    {
+      "id": "testPath",
+      "type": "promptString",
+      "description": "Folder or .spec.ts path inside TestCases",
+      "default": "NewTests"
+    },
+    {
+      "id": "userProfile",
+      "type": "pickString",
+      "description": "User profile",
+      "options": [
+        { "label": "rahbar", "value": "rahbar" },
+        { "label": "user1", "value": "user1" },
+        { "label": "user2", "value": "user2" },
+        { "label": "kartable", "value": "kartable" }
+      ],
+      "default": "rahbar"
+    },
+    {
+      "id": "deviceProfile",
+      "type": "pickString",
+      "description": "Recording device",
+      "options": [
+        { "label": "Desktop Chrome", "value": "desktop" },
+        { "label": "Pixel 7", "value": "pixel-7" },
+        { "label": "iPhone 15 Pro Max", "value": "iphone-15-pro-max" }
+      ],
+      "default": "desktop"
+    },
+    {
+      "id": "snapshotMode",
+      "type": "pickString",
+      "description": "RestoreSnapshot changes the test environment. Enable it?",
+      "options": [
+        { "label": "Disabled", "value": "disabled" },
+        { "label": "Enabled (resets test environment)", "value": "enabled" }
+      ],
+      "default": "disabled"
+    }
+  ]
+}
