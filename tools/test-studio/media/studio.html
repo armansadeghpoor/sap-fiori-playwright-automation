@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src {{cspSource}}; script-src 'nonce-{{nonce}}';">
+  <link rel="stylesheet" href="{{style}}">
+  <title>Playwright Test Studio</title>
+</head>
+<body>
+  <header><span class="eyebrow" dir="ltr">PLAYWRIGHT TEST STUDIO</span><h1>از ایده تا ضبط تست</h1><p>تنظیمات را انتخاب کنید؛ ورود به برنامه خودکار انجام می‌شود.</p></header>
+  <p id="project" class="path" dir="ltr"></p>
+  <p id="init-error" class="error" role="alert" hidden></p>
+  <button id="refresh" type="button" class="secondary" hidden>بررسی دوبارهٔ پروژه</button>
+  <form id="form">
+    <fieldset id="fields" disabled>
+      <label for="name">نام تست</label>
+      <input id="name" name="name" dir="auto" required maxlength="180" placeholder="مثلاً بررسی مقدار پیش‌فرض" autocomplete="off">
+      <label for="path">پوشهٔ مقصد درون <bdi>TestCases</bdi></label>
+      <div class="folder-input">
+        <input id="path" name="path" dir="auto" value="NewTests" placeholder="NewTests یا Code/Form" aria-describedby="path-help" autocomplete="off">
+        <button id="browse" type="button" class="secondary" aria-label="مرور و انتخاب پوشهٔ مقصد">مرور پوشه…</button>
+      </div>
+      <p id="path-help" class="hint">پوشه را با «مرور» انتخاب کنید یا نام آن را بنویسید. خالی = خود TestCases. برای پوشهٔ جدید، نامش را بنویسید.</p>
+      <p id="folder-error" class="error" role="alert" hidden></p>
+      <div class="preview"><span class="hint">مسیر کامل فایل خروجی</span><output id="preview" class="path" dir="ltr">نام تست را وارد کنید.</output></div>
+      <p id="validation" class="error" role="alert" hidden></p>
+      <label for="user">کاربر</label><select id="user" name="user" dir="ltr"></select>
+      <label for="device">دستگاه</label><select id="device" name="device" dir="ltr"></select>
+      <p class="hint">مدل‌های موبایل در Chrome شبیه‌سازی می‌شوند.</p>
+      <label class="checkbox" for="snapshot"><input id="snapshot" name="snapshot" type="checkbox"><span>بازنشانی محیط با RestoreSnapshot</span></label>
+      <p id="snapshot-hint" class="hint">اختیاری؛ در صورت انتخاب، پیش از اجرا تأیید می‌گیریم.</p>
+      <button id="start" type="submit" disabled>ساخت تست و شروع ضبط</button>
+    </fieldset>
+  </form>
+  <section class="session" aria-label="وضعیت ضبط">
+    <p id="status" role="status" aria-live="polite">در حال اتصال به پروژه…</p>
+    <p id="created" class="path" dir="ltr" hidden></p>
+    <button id="open" type="button" class="secondary" hidden>باز کردن فایل تست</button>
+    <button id="run" type="button" disabled hidden>اجرای همین تست</button>
+    <p class="hint">پس از پایان ضبط، کد را در فایل بالا قرار دهید. اجرای همین تست فقط همین فایل را اجرا می‌کند و تغییرات ذخیره‌نشدهٔ آن را ذخیره می‌کند؛ تنظیمات از فایل تست خوانده می‌شوند، نه فرم.</p>
+    <button id="stop" type="button" class="secondary" hidden>پایان ضبط</button>
+    <p id="artifacts" class="path" dir="ltr" hidden></p>
+    <details id="details" hidden><summary>جزئیات اجرا</summary><pre id="log" dir="ltr"></pre></details>
+  </section>
+  <footer>پس از ورود، در Inspector ضبط را شروع کنید. سپس فقط کد مراحل تست و assertionها را در محل مشخص‌شدهٔ فایل بازشده قرار دهید. پیش از پایان ضبط، کد را کپی کنید.</footer>
+  <script nonce="{{nonce}}" src="{{script}}"></script>
+</body>
+</html>

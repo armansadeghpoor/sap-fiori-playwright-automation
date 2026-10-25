@@ -1,0 +1,35 @@
+{
+  "name": "playwright-test-studio",
+  "displayName": "Playwright Test Studio",
+  "description": "Local sidebar for the project's existing test generator and recorder.",
+  "version": "0.1.2",
+  "publisher": "newweb-local",
+  "private": true,
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Testing"],
+  "extensionKind": ["workspace"],
+  "main": "./extension.cjs",
+  "activationEvents": ["onView:playwrightTestStudio.form"],
+  "capabilities": {
+    "untrustedWorkspaces": { "supported": false, "description": "Executes the workspace's generator and recorder." },
+    "virtualWorkspaces": { "supported": false }
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [{ "id": "playwrightTestStudio", "title": "Playwright Test Studio", "icon": "media/studio.svg" }]
+    },
+    "views": {
+      "playwrightTestStudio": [{ "type": "webview", "id": "playwrightTestStudio.form", "name": "ساخت تست جدید" }]
+    },
+    "commands": [{ "command": "playwrightTestStudio.open", "title": "Playwright Test Studio: Open" }],
+    "configuration": {
+      "title": "Playwright Test Studio",
+      "properties": {
+        "playwrightTestStudio.nodePath": {
+          "type": "string", "default": "", "scope": "machine",
+          "description": "Optional absolute Node.js path. Otherwise use the standard Windows installation or PATH."
+        }
+      }
+    }
+  }
+}
