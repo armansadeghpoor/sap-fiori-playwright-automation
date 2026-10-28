@@ -1,9 +1,44 @@
 # Playwright Test Studio
 
-## نسخهٔ نهایی 0.2.2
+## نسخهٔ پیشنهادی 0.2.3 — بازکردن کد کنار Dashboard
 
-برای نصب، `playwright-test-studio-0.2.2.vsix` را از Install from VSIX نصب و
+برای نصب، `playwright-test-studio-0.2.3.vsix` را از Install from VSIX نصب و
 VS Code را در صورت درخواست Reload کنید. قالب آرشیو و رفتار اجرایی نسخهٔ 0.2.0 حفظ شده است.
+
+روی ردیف هر تست در Failure Details کلیک کنید: جزئیات انتخاب و همان Spec در Editor
+اصلی کنار Sidebar باز می‌شود. دکمهٔ «باز کردن کد» با Tab و Enter/Space هم قابل استفاده
+است. Checkbox اجرای مجدد، Report و Artifactها مستقل‌اند و کد را باز نمی‌کنند.
+
+برای Failed، خط خطای معتبرِ همان Spec انتخاب می‌شود؛ در نبود آن، خط تعریف تستِ همان
+شناسه از Run استفاده می‌شود. خط خارج از Spec یا نامعتبر به خط تعریف برمی‌گردد. اگر
+خط تعریف هم دیگر وجود نداشته باشد، ابتدای فایل با توضیح نمایش داده می‌شود. Passed و
+Skipped نیز قابل بازکردن‌اند. این رفتار هیچ تستی را اجرا یا ذخیره نمی‌کند.
+
+پنل فقط شناسهٔ Run و تست را ارسال می‌کند، نه مسیر یا شمارهٔ خط. Extension مسیر را از
+Manifest همان Run می‌گیرد و مسیر مطلق و واقعی را داخل TestCases این Workspace بررسی
+می‌کند؛ مسیر بیرونی، junction بیرونی، فایل حذف‌شده یا شناسهٔ نامعتبر خطای خوانا می‌دهد.
+فایل جابه‌جاشده با جست‌وجوی نام یا حدس به فایل دیگری نگاشت نمی‌شود.
+
+از `workspace.openTextDocument` و `window.showTextDocument` با `preview: true` و
+`preserveFocus: true` استفاده می‌شود. Editor مجاور Sidebar دوباره استفاده می‌شود؛
+در هر کلیک Split جدید ساخته نمی‌شود. فایل ویرایش‌شده ذخیره یا بسته نمی‌شود. اگر کاربر
+Preview را در تنظیمات VS Code غیرفعال کرده باشد، تنظیم کاربر اولویت دارد.
+[API رسمی Preview و Focus](https://code.visualstudio.com/api/references/vscode-api#TextDocumentShowOptions)
+
+تغییر hash فایل یا وجود ویرایش ذخیره‌نشده با هشدار در پنل مشخص می‌شود؛ فایل فعلی باز
+می‌شود، نه نسخهٔ تاریخی Git. شمارهٔ خط تاریخی ممکن است پس از ویرایش جابه‌جا شده باشد.
+برای Run قدیمی بدون sourceHash، عدم امکان تأیید تطابق نسخه اعلام می‌شود. History بدون
+بازنویسی یا Migration خوانده می‌شود.
+
+Acceptance روی سیستم اصلی: یک Run قبلی را انتخاب کنید، روی Failed و سپس Passed/Skipped
+کلیک کنید و خط انتخاب‌شده را ببینید؛ تست دوم باید در همان ناحیه باز شود. Checkbox را
+تغییر دهید و مطمئن شوید Editor عوض نمی‌شود. یک Spec را بدون ذخیره ویرایش و تست دیگری
+را باز کنید؛ ویرایش باید باقی بماند. هشدار اختلاف نسخه و ثابت‌ماندن History را بررسی کنید.
+
+```powershell
+node --test tools/test-studio/test/regression-source.test.cjs
+node tools/test-studio/test/run-vscode.cjs "C:\Users\Barsa\AppData\Local\Programs\Microsoft VS Code\Code.exe" tools/test-studio/test/regression-source-vscode.cjs
+```
 
 نام فایل بدون `.spec.ts` عنوان اصلی سناریوهاست. عنوان کامل Playwright در صورت مفیدبودن
 یا وجود چند تست در یک Spec زیر آن می‌آید. Project، مسیر اصلی و شناسهٔ واقعی تست در Details
@@ -39,7 +74,7 @@ node tools/test-studio/test/regression-webview.cjs
 
 ## Regression Execution Manager — نسخهٔ 0.2.0
 
-پس از نصب `playwright-test-studio-0.2.2.vsix` از **Install from VSIX…** و Reload،
+پس از نصب `playwright-test-studio-0.2.3.vsix` از **Install from VSIX…** و Reload،
 روی آیکون Playwright Test Studio کلیک کنید و نمای **Regression Execution Manager**
 را باز کنید. نمای «ساخت تست جدید» همچنان برای Recorder و Generator قبلی است.
 
@@ -118,7 +153,7 @@ be available, just as for the existing recorder.
 1. پوشهٔ اصلی `D:\NewWeb UiTest` را در VS Code باز کنید.
 2. فقط برای نصب اولیه، بخش Extensions را با `Ctrl+Shift+X` باز کنید. منوی سه‌نقطه ←
    **Install from VSIX…** را بزنید و فایل
-   `tools/test-studio/playwright-test-studio-0.2.2.vsix` را انتخاب کنید.
+   `tools/test-studio/playwright-test-studio-0.2.3.vsix` را انتخاب کنید.
    اگر VS Code درخواست Reload داد، آن را انجام دهید.
 3. روی آیکون پنجره و دکمهٔ پخش با نام **Playwright Test Studio** در Activity Bar کلیک کنید.
    اگر Activity Bar مخفی است، از View → Appearance → Activity Bar آن را نمایش دهید.

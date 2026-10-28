@@ -5,6 +5,7 @@
   let selectedRunId = "", inspectedTestId = "", followCurrent = true, lastResultId = "";
   let runs = [], catalog = [], catalogSignature = "", historyLimit = 6, testLimit = 8, catalogLimit = 12;
   let latestSummary = null, latestProgress = null, wasExecuting = false;
+  let sourceStatus = null;
   const selected = new Set(), catalogSelection = new Set();
   const states = {
     idle: ["○", "آماده"], passed: ["✓", "موفق"], failed: ["×", "ناموفق"], skipped: ["−", "Skipped"],
@@ -92,6 +93,18 @@
   el("selected").addEventListener("click", () => { if (detail) start({ scope: "selected", parentRunId: detail.manifest.id, ids: [...selected], headed: el("rerun-headed").checked }); });
   el("report").addEventListener("click", () => { if (detail) post("openReport", { id: detail.manifest.id }); });
   el("archive").addEventListener("click", () => { if (detail) post("openArchive", { id: detail.manifest.id }); });
+  function openSource(testId) {
+    if (!detail?.summary.tests.some(test => test.id === testId)) return;
+    sourceStatus = { id: detail.manifest.id, testId, message: "در حال بازکردن کد…" };
+    renderSourceStatus(); post("openSource", { id: detail.manifest.id, testId });
+  }
+  function renderSourceStatus() {
+    const matching = sourceStatus?.id === detail?.manifest.id && sourceStatus?.testId === inspectedTestId;
+    el("source-status").hidden = !matching;
+    setText("source-status", matching ? sourceStatus.message : "");
+    el("source-status").className = (matching && sourceStatus.error ? "alert danger" : "hint") + " preserve-lines";
+  }
+  el("open-source").addEventListener("click", () => openSource(inspectedTestId));
   el("select-all").addEventListener("change", () => {
     selected.clear(); if (el("select-all").checked) for (const test of detail?.summary.tests || []) selected.add(test.id); renderTests();
   });
@@ -183,7 +196,9 @@
         inspectedTestId = test.id;
         for (const row of el("tests").children) { const action = row.querySelector("button"); const active = action.dataset.testId === test.id; row.classList.toggle("is-selected", active); action.setAttribute("aria-pressed", String(active)); }
         renderInspector(test);
+        openSource(test.id);
       });
+      card.addEventListener("click", event => { if (!event.target.closest("input,button,label,a")) button.click(); });
       card.append(checkbox, button); el("tests").append(card);
     }
     el("tests-more").hidden = display.length <= testLimit;
@@ -199,6 +214,7 @@
     setText("failure-project", test.project || "Project ثبت نشده");
     setText("failure-spec-path", test.file || test.listFile || "");
     setText("failure-test-id", test.id);
+    renderSourceStatus();
     let location = error?.location, failure = Boolean(location);
     if (!location && error?.stack) {
       const match = clean(error.stack).match(/(?:[A-Za-z]:[\\/]|\/)[^\n()]*?\.spec\.[cm]?[jt]s:\d+:\d+/u);
@@ -279,6 +295,8 @@
         lastResultId = data.state.result.manifest.id;
         if (followCurrent || !detail) renderDetail(data.state.result);
       }
+    } else if (data.type === "source") {
+      if (data.id === detail?.manifest.id && data.testId === inspectedTestId) { sourceStatus = data; renderSourceStatus(); }
     } else if (data.type === "error") {
       if (typeof data.busy === "boolean") busy = data.busy;
       stopping = false;
