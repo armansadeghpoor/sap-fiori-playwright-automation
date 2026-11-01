@@ -1,3 +1,28 @@
+# Playwright Test Studio 0.3.0
+
+Release 0.3.0 pairs the existing Extension with Standalone Service protocol 2. The Extension remains a local client of the shared project lock. Service locks now reserve the legacy recovery sidecar, so even the original 0.2.3 binary cannot automatically recover an abandoned Service lock. The launcher refuses a registered installed 0.2.x Extension with an upgrade message; it never installs/reloads one automatically.
+
+Build and install the Extension once:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\test-studio\package.ps1
+code --install-extension "D:\NewWeb UiTest\tools\test-studio\playwright-test-studio-0.3.0.vsix" --force
+```
+
+Reload VS Code after installation. Alternatively use Extensions → Install from VSIX. The package contains the Extension runtime; the Standalone Service continues to run from this project's source, independently of VS Code. No automatic installation, Desktop modification, startup registration or Windows Service installation is performed.
+
+For daily use, see [Service/Launcher guide](service/README.md) and [Launcher recovery guide](LAUNCHER_RECOVERY.md). Create a shortcut only at an explicitly chosen location:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\test-studio\create-shortcut.ps1 -Destination "$([Environment]::GetFolderPath('Desktop'))\Playwright Test Studio.lnk"
+```
+
+The script refuses to overwrite an existing shortcut. Double-clicking the resulting shortcut opens the default browser and reuses a healthy verified Service. No terminal, port lookup or manual pairing is needed. Stop Service in the Dashboard explicitly; stop an active operation first.
+
+The sections below retain the earlier Extension feature guide and release history; older version numbers describe those earlier releases.
+
+---
+
 # Playwright Test Studio
 
 ## نسخهٔ پیشنهادی 0.2.3 — بازکردن کد کنار Dashboard

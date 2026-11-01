@@ -41,8 +41,10 @@ class RegressionReporter {
         };
       });
       if (process.env.STUDIO_REGRESSION_EXPECTED) {
-        const expected = JSON.parse(fs.readFileSync(process.env.STUDIO_REGRESSION_EXPECTED, "utf8")).sort();
-        const actual = tests.map(test => test.id).sort();
+        const input = JSON.parse(fs.readFileSync(process.env.STUDIO_REGRESSION_EXPECTED, "utf8"));
+        const identity = test => [test.id, test.project, test.file, test.listFile, test.titles, test.line, test.column, test.sourceHash];
+        const expected = input.map(test => typeof test === "string" ? test : JSON.stringify(identity(test))).sort();
+        const actual = tests.map(test => typeof input[0] === "string" ? test.id : JSON.stringify(identity(test))).sort();
         if (JSON.stringify(expected) !== JSON.stringify(actual)) {
           throw new Error(`مجموعهٔ تست‌های Runner با انتخاب شما یکسان نیست (${actual.length}/${expected.length})؛ اجرا پیش از شروع تست متوقف شد.`);
         }

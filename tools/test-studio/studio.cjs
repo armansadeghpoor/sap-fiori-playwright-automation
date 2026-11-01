@@ -109,7 +109,7 @@ function acquireLock(root) {
       recovery = fs.openSync(filename + ".recovery", "wx");
       let previous;
       try { previous = JSON.parse(fs.readFileSync(filename, "utf8")); } catch {}
-      if (previous && !alive(previous.owner) && !alive(previous.recorder)) {
+      if (previous && previous.recoveryPolicy !== "manual" && !alive(previous.owner) && !alive(previous.recorder)) {
         fs.unlinkSync(filename);
         try { fd = fs.openSync(filename, "wx"); } catch { /* another window won */ }
       }

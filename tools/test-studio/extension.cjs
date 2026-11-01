@@ -1,4 +1,5 @@
 const vscode = require("vscode");
+const { assertCompatible } = require("./compatibility.cjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -12,7 +13,9 @@ function projectRoot() {
     fs.existsSync(path.join(folder.uri.fsPath, "tools", "new-test.cjs")) &&
     fs.existsSync(path.join(folder.uri.fsPath, "tools", "recorder", "launch.cjs")));
   if (candidates.length !== 1) throw new Error("پوشهٔ اصلی یک پروژهٔ Playwright دارای tools/new-test.cjs را در VS Code باز کنید. در Workspace فعلی باید دقیقاً یک پروژهٔ سازگار وجود داشته باشد.");
-  return candidates[0].uri.fsPath;
+  const root=candidates[0].uri.fsPath;
+  assertCompatible(root,require("./package.json").version);
+  return root;
 }
 
 function renderHtml(webview, extensionUri, name = "studio") {

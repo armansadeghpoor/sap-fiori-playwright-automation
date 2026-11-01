@@ -61,17 +61,31 @@ function snapshot(folder, manifest) {
 }
 
 class History {
-  constructor(root) {
+  constructor(root, options = {}) {
     this.root = fs.realpathSync(root);
-    this.base = safeDirectory(this.root, [".playwright-studio", "runs"]);
+    this.readOnly = options.readOnly === true;
+    this.base = this.readOnly ? path.join(this.root, ".playwright-studio", "runs") : safeDirectory(this.root, [".playwright-studio", "runs"]);
+    if (this.readOnly) this.checkReadOnlyBase();
+  }
+  checkReadOnlyBase() {
+    let current = this.root;
+    for (const part of [".playwright-studio", "runs"]) {
+      current = path.join(current, part);
+      let stat;
+      try { stat = fs.lstatSync(current); } catch (error) { if (error.code === "ENOENT") return false; throw error; }
+      if (stat.isSymbolicLink() || !stat.isDirectory() || !within(this.root, fs.realpathSync(current))) throw new Error("مسیر آرشیو خواندنی معتبر نیست.");
+    }
+    return true;
   }
   directory(id) {
+    if (this.readOnly && !this.checkReadOnlyBase()) throw new Error("آرشیو موجود نیست.");
     if (typeof id !== "string" || !/^\d{8}T\d{9}Z-[0-9a-f-]{36}$/u.test(id)) throw new Error("شناسهٔ Run نامعتبر است.");
     const folder = path.join(this.base, id);
     if (!within(this.base, fs.realpathSync(folder)) || fs.lstatSync(folder).isSymbolicLink()) throw new Error("مسیر Run نامعتبر است.");
     return folder;
   }
   create(value) {
+    if (this.readOnly) throw new Error("History فقط‌خواندنی است.");
     const id = new Date().toISOString().replace(/[-:.]/gu, "") + "-" + crypto.randomUUID();
     const folder = path.join(this.base, id);
     fs.mkdirSync(folder);
@@ -81,10 +95,20 @@ class History {
   }
   detail(id) {
     const folder = this.directory(id);
+    if (this.readOnly) {
+      for (const name of ["manifest.json", "summary.json", "events.ndjson"]) {
+        const file = path.join(folder, name);
+        let stat;
+        try { stat = fs.lstatSync(file); } catch (error) { if (error.code === "ENOENT") continue; throw error; }
+        if (stat.isSymbolicLink() || !stat.isFile() || !within(folder, fs.realpathSync(file)) || stat.size > 64 * 1024 * 1024) throw new Error("فایل آرشیو خواندنی معتبر نیست.");
+      }
+    }
     const manifest = readJson(path.join(folder, "manifest.json"));
     const summaryFile = path.join(folder, "summary.json");
     if (fs.existsSync(summaryFile)) return { manifest, summary: readJson(summaryFile) };
     const state = snapshot(folder, manifest);
+    if (this.readOnly) return { manifest, summary: { ...state, status: "incomplete", complete: false, ownership: "unknown",
+      message: "Summary موجود نیست؛ تنها رویدادهای ثبت‌شده نمایش داده می‌شوند. وضعیت Process نامشخص است." } };
     let alive = false;
     try { process.kill(manifest.owner, 0); alive = true; } catch {}
     if (!alive) {
@@ -99,6 +123,7 @@ class History {
   }
   list() {
     const result = [];
+    if (this.readOnly && !this.checkReadOnlyBase()) return result;
     for (const entry of fs.readdirSync(this.base, { withFileTypes: true })) {
       if (!entry.isDirectory() || entry.isSymbolicLink()) continue;
       try {
@@ -111,6 +136,7 @@ class History {
     return result.sort((a, b) => b.id.localeCompare(a.id));
   }
   finalize(run, value) {
+    if (this.readOnly) throw new Error("History فقط‌خواندنی است.");
     const state = snapshot(run.folder, run.manifest);
     for (const test of state.tests) if (test.outcome === "running") test.outcome = "interrupted";
     state.counts.running = 0;

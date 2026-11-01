@@ -8,7 +8,7 @@ const reporter = path.join(__dirname, "reporter.cjs");
 
 function selectionLine(test) {
   const tokens = [test.project, test.listFile, ...test.titles];
-  if (tokens.some(token => typeof token !== "string" || /[\r\n›]/u.test(token))) throw new Error("عنوان این تست با قالب رسمی Test List سازگار نیست؛ انتخاب دقیق ممکن نشد.");
+  if (tokens.some(token => typeof token !== "string" || /[\r\n›]/u.test(token) || token !== token.trim())) throw new Error("عنوان این تست با قالب رسمی Test List سازگار نیست؛ انتخاب دقیق ممکن نشد.");
   return `[${test.project}] › ${test.listFile} › ${test.titles.join(" › ")}`;
 }
 
@@ -58,16 +58,29 @@ class RegressionManager {
       if (this.stopRequested && child.pid) void stopTree(child).catch(error => { outputError = error; });
     });
   }
-  async catalog(root, lock) {
+  async catalog(root, lock, { allowEmpty = false } = {}) {
     const folder = fs.mkdtempSync(path.join(os.tmpdir(), "pw-studio-catalog-"));
     try {
-      const code = await this.process(root, [this.cli(root), "test", "--list", "--reporter=" + reporter], this.env(folder), lock);
+      const code = await this.process(root, [this.cli(root), "test", "--list", ...(allowEmpty ? ["--pass-with-no-tests"] : []), "--reporter=" + reporter], this.env(folder), lock);
       const { events } = journal(folder);
       const begin = events.find(event => event.type === "begin");
       const errors = events.filter(event => event.type === "error");
       if (this.stopRequested) throw new Error("عملیات متوقف شد.");
       if (code !== 0 || !begin || errors.length || fs.existsSync(path.join(folder, "reporter-error.txt"))) throw new Error("Discovery ناموفق بود. جزئیات اجرا را بررسی کنید.\n" + this.state.log.slice(-4000));
       return begin;
+    } finally {
+      const real = fs.realpathSync(folder);
+      if (path.dirname(real) === fs.realpathSync(os.tmpdir()) && path.basename(real).startsWith("pw-studio-catalog-")) fs.rmSync(real, { recursive: true });
+    }
+  }
+  async verifyList(root, lock, tests, lines) {
+    const folder = fs.mkdtempSync(path.join(os.tmpdir(), "pw-studio-catalog-"));
+    try {
+      fs.writeFileSync(path.join(folder, "selection.txt"), lines.join("\n") + "\n");
+      writeNew(path.join(folder, "expected.json"), tests);
+      const env = this.env(folder); env.STUDIO_REGRESSION_EXPECTED = path.join(folder, "expected.json");
+      const code = await this.process(root, [this.cli(root), "test", "--list", "--test-list", path.join(folder, "selection.txt"), "--no-deps", "--forbid-only", "--reporter=" + reporter], env, lock);
+      if (code !== 0 || this.stopRequested || fs.existsSync(path.join(folder, "reporter-error.txt")) || !journal(folder).events.some(e => e.type === "begin")) throw new Error("Exact Test List verification failed before execution.");
     } finally {
       const real = fs.realpathSync(folder);
       if (path.dirname(real) === fs.realpathSync(os.tmpdir()) && path.basename(real).startsWith("pw-studio-catalog-")) fs.rmSync(real, { recursive: true });
@@ -126,14 +139,20 @@ class RegressionManager {
       this.publish({ phase: "discovering", message: "در حال بررسی مجموعهٔ تست‌ها…" });
       const catalog = await this.catalog(root, lock);
       if (this.host.root() !== root) throw new Error("پروژه در حین آماده‌سازی تغییر کرده است.");
+      await this.host.validateCatalog?.(catalog);
       const store = new History(root);
       const selected = this.choose(root, input, catalog, store);
       if (!selected.tests.length) throw new Error("تستی برای اجرای این انتخاب وجود ندارد.");
       const lines = selected.tests.map(selectionLine);
+      if (this.host.confirmExecution && !await this.host.confirmExecution(selected)) return;
       const resets = [...new Set(selected.tests.map(test => test.file))].filter(file => /restoreSnapshot|RestoreSnapshot/u.test(fs.readFileSync(file, "utf8")));
-      if (resets.length && this.host.confirmSnapshot && !await this.host.confirmSnapshot(resets)) {
+      if ((resets.length || this.host.alwaysConfirmSnapshot) && this.host.confirmSnapshot && !await this.host.confirmSnapshot(resets)) {
         this.publish({ phase: "cancelled", message: "اجرا لغو شد؛ Run جدیدی ساخته نشد." }); return;
       }
+      if (this.stopRequested || this.closing) return;
+      await this.host.beforeRun?.();
+      if (this.host.verifySelection) await this.verifyList(root, lock, selected.tests, lines);
+      await this.host.beforeRun?.();
       if (this.stopRequested || this.closing) return;
       let revision = null;
       try { revision = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, windowsHide: true, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim(); } catch {}
@@ -145,7 +164,7 @@ class RegressionManager {
       const started = Date.now();
       try {
         fs.writeFileSync(path.join(run.folder, "selection.txt"), lines.join("\n") + "\n", { flag: "wx" });
-        writeNew(path.join(run.folder, "expected.json"), selected.tests.map(test => test.id));
+        writeNew(path.join(run.folder, "expected.json"), selected.tests);
         const env = this.env(run.folder);
         env.STUDIO_REGRESSION_EXPECTED = path.join(run.folder, "expected.json");
         const args = [this.cli(root), "test", "--test-list", path.join(run.folder, "selection.txt"), "--workers=1", "--retries=0", "--no-deps", "--forbid-only", "--trace=retain-on-failure", "--update-snapshots=none",
@@ -180,7 +199,7 @@ class RegressionManager {
     this.busy = true; this.stopRequested = false;
     this.publish({ busy: true, log: "", result: null, progress: null });
     let lock;
-    try { const root = this.host.root(); lock = acquireLock(root); return await action(root, lock); }
+    try { const root = this.host.root(); lock = this.host.acquireLock ? this.host.acquireLock(root) : acquireLock(root); return await action(root, lock); }
     catch (error) { this.publish({ phase: this.stopRequested ? "interrupted" : "error", message: error.message }); throw error; }
     finally {
       if (this.child) await stopTree(this.child);
