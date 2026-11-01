@@ -3,6 +3,8 @@
   const $ = id => document.getElementById(id);
   let api, write, reading = false, busy = false, chosen = '', status = { windows: [] };
   function render() {
+    $('bridge-indicator').textContent = status.connected ? '● VS Code connected' : '○ VS Code disconnected';
+    $('bridge-indicator').dataset.state = status.connected ? 'connected' : 'disconnected';
     const select = $('bridge-window'); select.replaceChildren();
     const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.textContent = status.windows.length > 1 ? 'پنجرهٔ مقصد را انتخاب کنید' : 'پنجرهٔ VS Code'; select.append(placeholder);
     for (const window of status.windows) { const option = document.createElement('option'); option.value = window.windowId; option.textContent = window.label; select.append(option); }

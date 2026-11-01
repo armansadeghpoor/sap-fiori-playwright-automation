@@ -38,6 +38,7 @@
       check.setAttribute("aria-label", `انتخاب ${node.kind}: ${node.path || "TestCases"}${node.test ? " · " + node.test.titles.join(" › ") + " · " + node.test.project + " · " + node.test.line + ":" + node.test.column + " · " + node.test.id : ""}`);
       check.title = "تمام تست‌های این مورد، مستقل از فیلتر نمایشی"; check.checked = state.checked; check.indeterminate = state.partial; check.disabled = invalid || !node.ids.length;
       check.onchange = () => { try { selection.toggle(node.ids, check.checked, catalog); $("explorer-validation").textContent = ""; render(); } catch (error) { $("explorer-validation").textContent = error.message; } };
+      row.dataset.kind = node.kind; row.dataset.selected = String(state.checked || state.partial);
       row.append(check);
       if (node.key === activeKey && activeCheckbox) restoreFocus = check;
       if (node.kind !== "test") {

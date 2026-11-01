@@ -12,18 +12,18 @@
     try {
       const response = await fetch(url, { credentials: "same-origin", cache: "no-store", ...options, signal: controller.signal });
       const data = await response.json();
-      if (!response.ok) { if (response.status === 401) { connected = false; $("login").hidden = false; $("dashboard").hidden = true; $("bridge-panel").hidden = true; $("refresh").disabled = true; connection("locked", "نیاز به کد اتصال"); } throw new Error(data.error); }
+      if (!response.ok) { if (response.status === 401) { connected = false; $("login").hidden = false; $("dashboard").hidden = true; $("overview").hidden = true; if ($("diagnostics-drawer").open) $("diagnostics-drawer").close(); $("bridge-panel").hidden = true; $("refresh").disabled = true; connection("locked", "نیاز به کد اتصال"); } throw new Error(data.error); }
       return data;
     } catch (value) { if (value instanceof TypeError || value.name === "AbortError") { connection("offline", "Offline — آخرین دادهٔ دریافت‌شده"); throw new Error("ارتباط با سرویس محلی قطع است؛ دادهٔ نمایش‌داده‌شده تازه نیست."); } throw value; }
     finally { clearTimeout(timer); }
   }
-  function setTheme(value) { document.documentElement.dataset.theme = value; try { localStorage.setItem("studio-theme", value); } catch {} }
+  function setTheme(value) { document.documentElement.dataset.theme = value; $("theme").textContent = value === "dark" ? "☀ Light" : "☾ Dark"; $("theme").setAttribute("aria-label", value === "dark" ? "فعال کردن Light Mode" : "فعال کردن Dark Mode"); try { localStorage.setItem("studio-theme", value); } catch {} }
   let theme; try { theme = localStorage.getItem("studio-theme"); } catch {}
-  setTheme(theme || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
+  setTheme(theme === "light" ? "light" : "dark");
   $("theme").onclick = () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
   async function authenticate() {
-    const status = await api("/api/session"); connected = true; csrf = status.csrf; instanceId=status.instanceId; $("stop-service").disabled=false; $("project").textContent = status.project + " · Explorer & History Management · Execution Manager";
-    $("login").hidden = true; $("dashboard").hidden = false; $("refresh").disabled = false; connection("online", "● Online"); await window.StudioExplorer.connect(api, mutation); await window.StudioExecution.connect(api, mutation, history, status.instanceId); if(window.StudioBridge){$("bridge-panel").hidden=false;void window.StudioBridge.connect(api,mutation);} return status;
+    const status = await api("/api/session"); connected = true; csrf = status.csrf; instanceId=status.instanceId; $("stop-service").disabled=false; $("project").textContent = status.project;
+    $("login").hidden = true; $("dashboard").hidden = false; $("overview").hidden = false; $("refresh").disabled = false; connection("online", "● Online"); await window.StudioExplorer.connect(api, mutation); await window.StudioExecution.connect(api, mutation, history, status.instanceId); if(window.StudioBridge){$("bridge-panel").hidden=false;void window.StudioBridge.connect(api,mutation);} return status;
   }
   $("login").onsubmit = async event => {
     event.preventDefault(); const button = $("login").querySelector("button"); button.disabled = true;
@@ -36,11 +36,12 @@
     for (const id of selectedRuns) if (!runs.some(run => run.id === id && run.deletable)) selectedRuns.delete(id);
     if (runId && !runs.some(run => run.id === runId)) {
       runId = ""; testId = ""; detail = null; runTicket++; sourceTicket++;
-      $("run-title").textContent = "یک Run را انتخاب کنید"; $("run-id").textContent = ""; $("metrics").replaceChildren(); $("tests").replaceChildren();
+      $("run-title").textContent = "یک Run را انتخاب کنید"; $("run-id").textContent = ""; $("metrics").replaceChildren(); $("summary-scope").textContent = "یک Run از History انتخاب کنید · مستقل از Catalog"; $("tests").replaceChildren();
       $("run-note").hidden = true; $("run-errors").hidden = true; $("test-detail").hidden = true; $("inspect-empty").hidden = false;
       $("media").replaceChildren(); $("code-preview").replaceChildren();
     }
     $("empty").hidden = Boolean(runs.length);
+    if (!runs.length) { $("summary-scope").textContent = "History خالی است · مستقل از Catalog"; $("metrics").replaceChildren(make("div", "هنوز Run ثبت‌شده‌ای وجود ندارد.", "empty-summary")); }
     for (const run of runs) {
       const row = make("div", "", "history-row"), select = document.createElement("input"); select.type = "checkbox"; select.className = "history-select";
       select.setAttribute("aria-label", "انتخاب Run: " + run.label + " #" + run.id.slice(-6)); select.checked = selectedRuns.has(run.id);
@@ -63,12 +64,12 @@
     for (const button of $("history").querySelectorAll(".history-card")) button.setAttribute("aria-pressed", String(button.dataset.runId === id));
     $("test-detail").hidden = true; $("inspect-empty").hidden = false; $("tests").replaceChildren();
     const value = await api("/api/runs/" + encodeURIComponent(id)); if (ticket !== runTicket) return;
-    detail = value; $("run-title").textContent = value.label; $("run-id").textContent = value.id;
+    detail = value; $("run-title").textContent = value.label; $("run-id").textContent = value.id; $("summary-scope").textContent = `Run: ${value.label} · #${value.id.slice(-6)} · Duration ${duration(value.duration)}`;
     $("run-note").hidden = value.complete; $("run-note").textContent = "این Run کامل بسته نشده است؛ مقادیر فقط آخرین ثبت موجود هستند و وضعیت Process از آن‌ها حدس زده نمی‌شود.\n" + (value.message || "");
     $("run-errors").textContent = (value.errors || []).join("\n\n"); $("run-errors").hidden = !value.errors?.length;
     $("metrics").replaceChildren();
-    for (const [name, count] of [["Passed", value.counts.passed], ["Failed", value.counts.failed], ["Skipped", value.counts.skipped], ["Duration", duration(value.duration)]]) {
-      const metric = make("div", "", "metric"); metric.append(make("span", name), make("b", count)); $("metrics").append(metric);
+    for (const [name, count] of [["Total Tests", value.total], ["Passed", value.counts.passed], ["Failed", value.counts.failed], ["Skipped", value.counts.skipped]]) {
+      const metric = make("div", "", "metric"); metric.dataset.kind = name.toLowerCase().replace(/ /g,"-"); metric.append(make("span", name), make("b", count ?? "—")); $("metrics").append(metric);
     }
     $("search").value = ""; $("filter").value = "all"; renderTests(); error("");
     const first = value.tests.find(test => test.outcome === "failed") || value.tests[0]; if (first) selectTest(first);
@@ -153,10 +154,11 @@
       check.onchange = () => { if(check.checked)rerunIds.add(test.id);else rerunIds.delete(test.id); rerunControls(); };
       button.onclick = () => selectTest(test); $("tests").append(check, button);
     }
+    if (detail && !$("tests").children.length) $("tests").append(make("p", "تستی مطابق این جست‌وجو و فیلتر وجود ندارد.", "empty-results muted"));
   }
   function selectTest(test) {
     testId = test.id; sourceTicket++; renderTests(); $("test-detail").hidden = false; $("inspect-empty").hidden = true;
-    $("test-title").textContent = test.title; $("test-meta").textContent = `${test.project} · ${test.displayPath} · ${test.id}`;
+    $("test-outcome").textContent = labels[test.outcome] || test.outcome; $("test-outcome").className = "badge " + test.outcome; $("failure-message").className = test.errors.length ? "error" : test.outcome; $("test-title").textContent = test.title; $("test-meta").textContent = `${test.project} · ${test.displayPath} · ${test.id}`;
     $("failure-message").textContent = test.errors.map(item => item.message).join("\n\n") || (labels[test.outcome] || test.outcome);
     $("stack").textContent = test.errors.map(item => item.stack).join("\n\n"); $("stack-section").hidden = !test.errors.length;
     $("media").replaceChildren(); $("artifacts").replaceChildren(); $("code-preview").replaceChildren(); $("source-note").textContent = "";
@@ -168,6 +170,7 @@
         button.onclick = () => { const media = document.createElement(item.kind === "image" ? "img" : "video"); media.src = url; media.onerror = () => $("media").replaceChildren(make("p", "پیوست موجود یا مجاز نیست؛ آرشیو را بررسی کنید.", "error")); if (item.kind === "image") media.alt = item.name; else { media.controls = true; media.preload = "metadata"; } $("media").replaceChildren(media); }; $("artifacts").append(button);
       }
     }
+    if (!test.attachments.length) $("artifacts").append(make("p", "Artifact ثبت‌شده‌ای برای این تست وجود ندارد.", "muted"));
     void source().catch(value => { $("source-note").textContent = value.message; });
   }
   async function source() {
@@ -189,4 +192,24 @@
   window.addEventListener('studio-execution',rerunControls);
   $("stop-service").onclick=async()=>{if(!window.confirm('سرویس همین Dashboard بسته شود؟ اجرای فعال باید ابتدا با Stop متوقف شود.'))return;try{await mutation('/api/service/stop',{instanceId,confirm:true});$('stop-service').disabled=true;connection('offline','Service stopped');}catch(value){error(value.message);}};
   void (async()=>{try{await window.StudioBootstrap;}catch(value){error(value.message);}await check();})(); setInterval(() => void check(), 5000);
+})();
+
+// Presentation only: move the existing Inspector, never clone its state or handlers.
+(() => {
+ const $ = id => document.getElementById(id), shell = document.querySelector('.app-shell');
+ function collapse(value) { shell.dataset.collapsed = String(value); $('nav-toggle').setAttribute('aria-expanded', String(!value)); try { localStorage.setItem('studio-nav-collapsed', String(value)); } catch {} }
+ try { collapse(localStorage.getItem('studio-nav-collapsed') === 'true'); } catch { collapse(false); }
+ $('nav-toggle').onclick = () => collapse(shell.dataset.collapsed !== 'true');
+ document.querySelectorAll('#nav-links a').forEach(link => link.addEventListener('click', event => {
+  const target = document.querySelector(link.getAttribute('href')); if (!target || target.hidden) return;
+  event.preventDefault(); document.querySelectorAll('#nav-links a').forEach(a => a.removeAttribute('aria-current')); link.setAttribute('aria-current','location');
+  target.scrollIntoView({block:'start'}); target.focus({preventScroll:true});
+ }));
+ const drawer = $('diagnostics-drawer'), panel = $('inspector-panel');
+ $('inspector-expand').onclick = () => { $('drawer-content').append(panel); $('inspector-expand').hidden = true; drawer.showModal(); $('drawer-close').focus(); };
+ $('drawer-close').onclick = () => drawer.close();
+ drawer.addEventListener('close', () => { $('inspector-slot').append(panel); $('inspector-expand').hidden = false; $('inspector-expand').focus(); });
+ window.StudioVisual = {
+  execution(operation) { $('execution-panel').dataset.phase = operation.phase; const p = operation.progress, meter = $('execution-meter'); meter.hidden = !p; if (p) { meter.max = Math.max(1,p.total || 0); meter.value = p.completed || 0; } }
+ };
 })();

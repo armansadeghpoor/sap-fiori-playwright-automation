@@ -2,7 +2,7 @@
   "name": "playwright-test-studio",
   "displayName": "Playwright Test Studio",
   "description": "Local test recording and regression execution with durable run history.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "publisher": "newweb-local",
   "private": true,
   "engines": {

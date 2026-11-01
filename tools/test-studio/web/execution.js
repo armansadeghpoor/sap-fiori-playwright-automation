@@ -6,6 +6,7 @@
     const wasBusy=window.StudioExecution.busy;
     window.StudioExecution.busy=Boolean(operation.busy||submitting);
     $('execution-status').textContent=`${operation.phase} · ${operation.scope||''} · ${operation.count||0} tests · ${operation.headed?'Headed':'Headless'}${operation.id?' · #'+operation.id.slice(0,8):''}`;
+    window.StudioVisual?.execution(operation);
     const p=operation.progress;
     $('execution-progress').textContent=p?`${p.completed}/${p.total} · Passed ${p.counts?.passed||0} · Failed ${p.counts?.failed||0} · Skipped ${p.counts?.skipped||0} · ${((p.elapsed||0)/1000).toFixed(1)}s · ${p.current||''}`:'';
     $('execution-error').textContent=operation.error?`${operation.error.code}: ${operation.error.message}`:'';

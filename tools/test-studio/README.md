@@ -1,3 +1,9 @@
+# Playwright Test Studio 0.5.0 — Hybrid Developer Command Center
+
+Standalone visual redesign. Manual acceptance succeeded for refresh, Dark/Light, collapsible navigation, Inspector/Escape, Source/Artifacts/Open in VS Code, and Summary/History. Dark-first and Light themes, responsive navigation, selected-run summary, and an expanded Inspector. Runner, service security, data formats, and Bridge protocol are unchanged. See [UI design and validation](UI_DESIGN.md). The Standalone Dashboard is served from the repository; installing the VSIX alone does not replace those web assets. The 0.4.0 installed extension remains compatible.
+
+---
+
 # Playwright Test Studio 0.4.0 — VS Code Bridge
 
 Standalone source actions now connect to a specific trusted VS Code project window. See [Bridge architecture, installation and two-monitor acceptance](BRIDGE.md). Manual acceptance of Open in VS Code from the Standalone Dashboard succeeded. Version 0.4.0 is the accepted Windows-local Bridge release. The existing Launcher and Source Preview remain compatible.
