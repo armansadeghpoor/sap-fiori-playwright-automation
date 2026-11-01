@@ -7,15 +7,17 @@ const { Trash } = require("./trash.cjs");
 const { Catalog } = require("./catalog.cjs");
 const { Execution } = require("./execution.cjs");
 const { Bootstrap } = require("./bootstrap.cjs");
+const { Bridge } = require("./bridge.cjs");
 const { Events } = require("./events.cjs");
 const { key } = require("./native.cjs");
 const equal = (a, b) => { const left = Buffer.from(String(a || "")), right = Buffer.from(String(b || "")); return left.length === right.length && crypto.timingSafeEqual(left, right); };
 
-async function createService({ root, sessionLifetime = 8 * 60 * 60 * 1000, trashOptions, catalogOptions, executionOptions, instanceId = crypto.randomUUID(), privateDirectory, bootstrapTTL, port = 0, onStop }) {
+async function createService({ root, sessionLifetime = 8 * 60 * 60 * 1000, trashOptions, catalogOptions, executionOptions, instanceId = crypto.randomUUID(), privateDirectory, bootstrapTTL, port = 0, onStop, bridgeOptions }) {
   const repository = new Repository(root), sessions = new Map(), pairingCode = crypto.randomBytes(32).toString("hex");
   const trash = new Trash(repository, trashOptions);
   const catalog = new Catalog(repository.root, catalogOptions);
   const execution = new Execution(repository, catalog, executionOptions);
+  const bridge = new Bridge(repository, catalog, bridgeOptions);
   const bootstrap = new Bootstrap(instanceId, privateDirectory, bootstrapTTL);
   const events = new Events(instanceId, execution);
   const cookieName = "studio_" + crypto.randomBytes(8).toString("hex");
@@ -52,7 +54,7 @@ async function createService({ root, sessionLifetime = 8 * 60 * 60 * 1000, trash
         if(request.headers.origin || request.headers['sec-fetch-site'] || request.headers['x-studio-launcher']!=='1')throw fail(403,'Native launcher required.');
         json(response,200,bootstrap.issue(await body(request,2048)));return;
       }
-      const assets = { "/bootstrap.js": ["bootstrap.js", "application/javascript; charset=utf-8"], "/stream-model.js": ["stream-model.js", "application/javascript; charset=utf-8"], "/execution.js": ["execution.js", "application/javascript; charset=utf-8"], "/": ["dashboard.html", "text/html; charset=utf-8"], "/dashboard.js": ["dashboard.js", "application/javascript; charset=utf-8"], "/explorer.js": ["explorer.js", "application/javascript; charset=utf-8"], "/explorer-model.js": ["explorer-model.js", "application/javascript; charset=utf-8"], "/dashboard.css": ["dashboard.css", "text/css; charset=utf-8"] };
+      const assets = { "/bridge.js": ["bridge.js", "application/javascript; charset=utf-8"], "/bootstrap.js": ["bootstrap.js", "application/javascript; charset=utf-8"], "/stream-model.js": ["stream-model.js", "application/javascript; charset=utf-8"], "/execution.js": ["execution.js", "application/javascript; charset=utf-8"], "/": ["dashboard.html", "text/html; charset=utf-8"], "/dashboard.js": ["dashboard.js", "application/javascript; charset=utf-8"], "/explorer.js": ["explorer.js", "application/javascript; charset=utf-8"], "/explorer-model.js": ["explorer-model.js", "application/javascript; charset=utf-8"], "/dashboard.css": ["dashboard.css", "text/css; charset=utf-8"] };
       if (request.method === "GET" && Object.hasOwn(assets, route)) {
         const [name, type] = assets[route]; response.writeHead(200, { "Content-Type": type }); response.end(fs.readFileSync(path.join(__dirname, "..", "web", name))); return;
       }
@@ -73,6 +75,11 @@ async function createService({ root, sessionLifetime = 8 * 60 * 60 * 1000, trash
       }
       if (!route.startsWith("/api/")) throw fail(404, "مسیر موجود نیست.");
       const currentSession = session(request);
+      if (request.method === 'GET' && route === '/api/bridge') { json(response, 200, await bridge.status()); return; }
+      if (request.method === 'POST' && route === '/api/bridge/open') {
+        if (request.headers.origin !== origin || !equal(request.headers['x-studio-csrf'], currentSession.csrf)) throw fail(403, 'Origin / CSRF required.');
+        json(response, 200, await bridge.open(await body(request, 8192))); return;
+      }
       if(request.method==='GET' && route==='/api/events'){events.subscribe(request,response,currentSession);return;}
       if(request.method==='POST' && route==='/api/service/stop'){
         if(request.headers.origin!==origin||!equal(request.headers['x-studio-csrf'],currentSession.csrf))throw fail(403,'Origin / CSRF required.');
@@ -134,6 +141,6 @@ async function createService({ root, sessionLifetime = 8 * 60 * 60 * 1000, trash
   server.requestTimeout = 10000; server.headersTimeout = 10000; server.maxHeadersCount = 50;
   await new Promise((resolve, reject) => { server.once("error", error=>{events.close();reject(error);}); server.listen(port, "127.0.0.1", resolve); });
   origin = `http://127.0.0.1:${server.address().port}`;
-  return { server, origin, pairingCode, instanceId, bootstrap, events, repository, trash, catalog, execution, async close() { if (closed) return; closed = true; events.close(); bootstrap.tokens.clear(); sessions.clear(); trash.plans.clear(); await execution.close(); await catalog.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); } };
+  return { server, origin, pairingCode, instanceId, bootstrap, events, repository, trash, catalog, execution, bridge, async close() { if (closed) return; closed = true; events.close(); bootstrap.tokens.clear(); sessions.clear(); trash.plans.clear(); await execution.close(); await catalog.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); } };
 }
 module.exports = { createService };

@@ -15,3 +15,5 @@
 @media(min-width:1000px) and (max-width:1499px){main{grid-template-areas:"execution execution execution" "explorer history results" "explorer inspector inspector"}}
 @media(min-width:701px) and (max-width:999px){main{grid-template-areas:"execution execution" "explorer history" "results results" "inspector inspector"}}
 #tests input[type=checkbox]{width:auto}
+
+.bridge-panel{margin-bottom:14px}.bridge-panel select{width:auto;max-width:100%;flex:1;min-width:180px}.bridge-panel [data-state=connected]{color:var(--pass)}.explorer-row{flex-wrap:wrap}.explorer-row .explorer-label{flex-basis:150px}

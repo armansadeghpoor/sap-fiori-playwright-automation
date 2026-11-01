@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { RegressionManager } = require("./manager.cjs");
+const { location } = require("./source.cjs");
 const { within, hashFile } = require("./history.cjs");
 const { relativeFolder } = require("../studio.cjs");
 
@@ -102,36 +103,10 @@ class RegressionView {
       if (!current()) return;
       if (fs.realpathSync(this.helpers.root()) !== root || fs.realpathSync(filename) !== realFile) throw new Error("پروژه یا مسیر Spec هنگام بازکردن تغییر کرد؛ دوباره انتخاب کنید.");
       const changed = document.isDirty || Boolean(test.sourceHash && hashFile(realFile) !== test.sourceHash);
-      const validLine = line => Number.isSafeInteger(line) && line > 0 && line <= document.lineCount;
-      const sameSpec = file => typeof file === "string" && path.isAbsolute(file) &&
-        (path.relative(filename, file) === "" || path.relative(realFile, file) === "");
-      let location;
       const result = (summary.tests || []).find(item => item.id === testId);
-      if (result?.outcome === "failed") {
-        for (const error of result.attempts?.at(-1)?.errors || []) {
-          if (typeof error.location?.file === "string" && path.isAbsolute(error.location.file)) {
-            if (sameSpec(error.location.file) && validLine(error.location.line)) location = error.location;
-            // An explicit helper/out-of-range location must fall back to the definition.
-            break;
-          }
-          // Playwright can truncate location.file for paths containing parentheses.
-          // Only an absolute, validated stack frame may repair that missing location.
-          const stack = String(error.stack || "").replace(/\x1b\[[0-?]*[ -/]*[@-~]/gu, "");
-          for (const frame of stack.split(/\r?\n/u)) {
-            const match = frame.match(/(?:^|\s|\()((?:[A-Za-z]:[\\/]|\/)[^\r\n]*):(\d+):(\d+)\)?\s*$/u);
-            if (match) {
-              if (sameSpec(match[1]) && validLine(Number(match[2]))) location = { line: Number(match[2]), column: Number(match[3]) };
-              break; // Do not turn a helper frame into a guessed Spec failure location.
-            }
-          }
-          if (location) break;
-        }
-      }
-      const historicalLine = location?.line || test.line;
-      const line = validLine(historicalLine) ? historicalLine - 1 : 0;
-      const selectedColumn = location ? location.column : test.column;
-      const column = Math.min(document.lineAt(line).text.length, Math.max(0,
-        validLine(historicalLine) && Number.isSafeInteger(selectedColumn) ? selectedColumn - 1 : 0));
+      const content = document.getText ? document.getText() : Array.from({ length: document.lineCount }, (_, index) => document.lineAt(index).text).join("\n");
+      const target = location(test, result, content, realFile);
+      const line = target.line - 1, column = target.column - 1;
       const range = new this.vscode.Range(line, column, line, column);
       const visible = this.vscode.window.visibleTextEditors?.find(editor => editor.document.uri.fsPath === document.uri.fsPath);
       const groups = this.vscode.window.tabGroups?.all || [];
@@ -145,7 +120,7 @@ class RegressionView {
       if (!current()) return;
       const notes = [changed ? "هشدار: فایل فعلی یا ویرایش ذخیره‌نشده با کد زمان Run متفاوت است؛ شمارهٔ خط‌ها تاریخی هستند." :
         !test.sourceHash ? "اثر انگشت کد در این Run موجود نیست؛ تطابق نسخه قابل تأیید نیست." : "",
-      !validLine(historicalLine) ? "خط ثبت‌شده دیگر معتبر نیست؛ ابتدای فایل نمایش داده شد." : ""];
+      !target.validLine ? "خط ثبت‌شده دیگر معتبر نیست؛ ابتدای فایل نمایش داده شد." : ""];
       this.send({ type: "source", id, testId, changed, message: "کد باز شد · خط " + (line + 1) + (notes.some(Boolean) ? "\n" + notes.filter(Boolean).join("\n") : "") });
     } catch (error) {
       if (current()) this.send({ type: "source", id, testId, error: true, message: error.code ?

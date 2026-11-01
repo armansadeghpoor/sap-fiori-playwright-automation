@@ -157,7 +157,8 @@ class StudioProvider {
   }
 }
 
-let provider, regression;
+let provider, regression, bridge;
+const { BridgeController } = require('./bridge/controller.cjs');
 function activate(context) {
   provider = new StudioProvider(context);
   regression = new RegressionView(context, vscode, { root: projectRoot, node: provider.node, render: renderHtml });
@@ -167,7 +168,17 @@ function activate(context) {
     vscode.commands.registerCommand("playwrightTestStudio.regression.open", () => vscode.commands.executeCommand("playwrightTestStudio.regression.focus")),
     vscode.commands.registerCommand("playwrightTestStudio.open", () => vscode.commands.executeCommand("workbench.view.extension.playwrightTestStudio")),
     vscode.workspace.onDidChangeWorkspaceFolders(() => void provider.initialize()));
-  return { provider, regression };
+  // Minimal unit-test hosts do not expose the native window APIs.
+  if (vscode.window.createStatusBarItem) {
+    bridge = new BridgeController(vscode, projectRoot);
+    context.subscriptions.push(
+      vscode.commands.registerCommand('playwrightTestStudio.bridge.status', () => bridge.describe()),
+      vscode.commands.registerCommand('playwrightTestStudio.bridge.reconnect', () => bridge.refresh()),
+      vscode.workspace.onDidChangeWorkspaceFolders(() => void bridge.refresh()));
+    if (vscode.workspace.onDidGrantWorkspaceTrust) context.subscriptions.push(vscode.workspace.onDidGrantWorkspaceTrust(() => void bridge.refresh()));
+    void bridge.refresh();
+  }
+  return { provider, regression, bridge };
 }
-async function deactivate() { await Promise.all([provider?.shutdown(), regression?.shutdown()]); }
+async function deactivate() { await Promise.all([provider?.shutdown(), regression?.shutdown(), bridge?.close()]); }
 module.exports = { activate, deactivate };

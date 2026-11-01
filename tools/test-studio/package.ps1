@@ -1,11 +1,11 @@
 param([string]$OutputDirectory = $PSScriptRoot)
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression
-$manifest = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'package.json') -Raw | ConvertFrom-Json
+$manifest = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'package.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $outputFolder = [IO.Path]::GetFullPath($OutputDirectory)
 [IO.Directory]::CreateDirectory($outputFolder) | Out-Null
 $outputFile = Join-Path $outputFolder ("playwright-test-studio-{0}.vsix" -f $manifest.version)
-$files = @('package.json', 'compatibility.cjs', 'extension.cjs', 'studio.cjs', 'README.md', 'media/studio.svg', 'media/studio.html', 'media/studio.css', 'media/studio.js', 'media/regression.html', 'media/regression.css', 'media/regression.js', 'regression/history.cjs', 'regression/reporter.cjs', 'regression/manager.cjs', 'regression/view.cjs')
+$files = @('BRIDGE.md','bridge/controller.cjs', 'bridge/host.cjs', 'bridge/registry.cjs', 'regression/source.cjs', 'service/native.cjs', 'service/identity.ps1', 'service/private-directory.ps1', 'package.json', 'compatibility.cjs', 'extension.cjs', 'studio.cjs', 'README.md', 'media/studio.svg', 'media/studio.html', 'media/studio.css', 'media/studio.js', 'media/regression.html', 'media/regression.css', 'media/regression.js', 'regression/history.cjs', 'regression/reporter.cjs', 'regression/manager.cjs', 'regression/view.cjs')
 foreach ($file in $files) {
   if (-not (Test-Path -LiteralPath (Join-Path $PSScriptRoot $file) -PathType Leaf)) { throw "Missing package file: $file" }
 }
@@ -30,6 +30,7 @@ $contentTypes = @'
   <Default Extension="json" ContentType="application/json" /><Default Extension="cjs" ContentType="application/javascript" />
   <Default Extension="js" ContentType="application/javascript" /><Default Extension="css" ContentType="text/css" />
   <Default Extension="html" ContentType="text/html" /><Default Extension="svg" ContentType="image/svg+xml" />
+  <Default Extension="ps1" ContentType="text/plain" />
   <Default Extension="md" ContentType="text/markdown" /><Default Extension="vsixmanifest" ContentType="text/xml" />
 </Types>
 '@

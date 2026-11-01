@@ -51,7 +51,10 @@
         const label = make("div", "", "explorer-label"); label.title = node.test.id;
         const title = make("span", node.text); title.dir = "auto";
         label.append(title, make("span", `${node.test.project || "(default)"} · L${node.test.line}:${node.test.column} · ${node.test.titles.join(" › ")}`, "technical card-meta"));
-        row.append(label); li.append(row);
+        const source = make("button", "Open in VS Code"); source.type = "button"; source.disabled = catalog.phase !== 'ready' || stale;
+        source.dataset.openTestId = node.test.id;
+        source.onclick = () => window.StudioBridge.open({kind:'catalog',catalogRevision:catalog.catalogRevision,testId:node.test.id});
+        row.append(label, source); li.append(row);
       }
       const run = make("button", node.kind === 'test' ? 'Run Test' : node.kind === 'file' ? 'Run File' : 'Run Folder'); run.type='button';
       run.disabled = invalid || !node.ids.length || window.StudioExecution?.busy;

@@ -1,3 +1,7 @@
+# Playwright Test Studio 0.4.0 — VS Code Bridge
+
+Standalone source actions now connect to a specific trusted VS Code project window. See [Bridge architecture, installation and two-monitor acceptance](BRIDGE.md). Manual acceptance of Open in VS Code from the Standalone Dashboard succeeded. Version 0.4.0 is the accepted Windows-local Bridge release. The existing Launcher and Source Preview remain compatible.
+
 # Playwright Test Studio 0.3.0
 
 Release 0.3.0 pairs the existing Extension with Standalone Service protocol 2. The Extension remains a local client of the shared project lock. Service locks now reserve the legacy recovery sidecar, so even the original 0.2.3 binary cannot automatically recover an abandoned Service lock. The launcher refuses a registered installed 0.2.x Extension with an upgrade message; it never installs/reloads one automatically.

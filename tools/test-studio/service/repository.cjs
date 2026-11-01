@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { safeSpec, location } = require("../regression/source.cjs");
 const { History, within } = require("../regression/history.cjs");
 const RUN_ID = /^\d{8}T\d{9}Z-[0-9a-f-]{36}$/u;
 const text = value => String(value ?? "").replace(/\x1b\[[0-?]*[ -/]*[@-~]/gu, "").slice(0, 32768);
@@ -83,20 +84,11 @@ class Repository {
     const value = this.raw(id), original = value.manifest.tests.find(test => test.id === testId), test = this.find(value, testId);
     const filename = original?.file, base = path.join(this.root, "TestCases");
     try {
-      if (typeof filename !== "string" || !path.isAbsolute(filename) || !/\.spec\.ts$/iu.test(filename) || !within(base, filename) || path.relative(base, filename).includes(":")) throw new Error("invalid source");
-      const realBase = fs.realpathSync(base), real = fs.realpathSync(filename), stat = fs.statSync(real);
-      if (!within(this.root, realBase) || !within(realBase, real) || !stat.isFile() || stat.size > 1024 * 1024) throw new Error("invalid source");
-      const buffer = fs.readFileSync(real), content = buffer.toString("utf8"), lines = content.split(/\r?\n/u);
-      const valid = line => Number.isSafeInteger(line) && line > 0 && line <= lines.length;
-      const same = file => typeof file === "string" && path.isAbsolute(file) && (path.relative(filename, file) === "" || path.relative(real, file) === "");
-      let target = original.line;
-      if (test.outcome === "failed") for (const error of test.attempts?.at(-1)?.errors || []) {
-        if (typeof error.location?.file === "string" && path.isAbsolute(error.location.file)) { if (same(error.location.file) && valid(error.location.line)) target = error.location.line; break; }
-        const match = text(error.stack).split("\n").map(frame => frame.match(/(?:^|\s|\()((?:[A-Za-z]:[\\/]|\/)[^\r\n]*):(\d+):(\d+)\)?\s*$/u)).find(Boolean);
-        if (match) { if (same(match[1]) && valid(Number(match[2]))) target = Number(match[2]); break; }
-      }
+      const real = safeSpec(this.root, filename);
+      const buffer = fs.readFileSync(real), content = buffer.toString("utf8");
+      const target = location(original, test, content, real);
       const changed = original.sourceHash ? crypto.createHash("sha256").update(buffer).digest("hex") !== original.sourceHash : null;
-      return { testId, content, line: valid(target) ? target : 1, changed, displayPath: path.relative(this.root, filename).split(path.sep).join("/"),
+      return { testId, content, line: target.line, changed, displayPath: path.relative(this.root, filename).split(path.sep).join("/"),
         notice: changed === true ? "فایل فعلی با زمان Run متفاوت است؛ شمارهٔ خط تاریخی است." : changed === null ? "تطابق نسخهٔ کد قابل تأیید نیست." : "نسخهٔ روی دیسک با اثر انگشت Run برابر است." };
     } catch { throw fail(404, "Spec موجود یا مجاز نیست؛ فایل ممکن است حذف، منتقل یا بیش از حد بزرگ شده باشد."); }
   }

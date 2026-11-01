@@ -32,7 +32,22 @@ const { fixture, cleanup, fingerprint } = require("./standalone-fixture.cjs");
       await page.getByRole("button",{name:"نمایش Screenshot",exact:true}).first().click();
       await page.waitForFunction(()=>document.querySelector("#media img")?.naturalWidth>0);
       // Generate an actual local WebM, without importing or executing any test spec.
-      const video=await page.evaluate(async()=>{const canvas=document.createElement("canvas");canvas.width=64;canvas.height=64;const ctx=canvas.getContext("2d");ctx.fillStyle="#2255cc";ctx.fillRect(0,0,64,64);const stream=canvas.captureStream(5),recorder=new MediaRecorder(stream,{mimeType:"video/webm"}),parts=[];return new Promise(resolve=>{recorder.ondataavailable=e=>parts.push(e.data);recorder.onstop=async()=>{stream.getTracks().forEach(track=>track.stop());resolve([...new Uint8Array(await new Blob(parts).arrayBuffer())]);};recorder.start();setTimeout(()=>recorder.stop(),350);});});
+      const video=await page.evaluate(async()=>{
+        const canvas=document.createElement("canvas");canvas.width=64;canvas.height=64;
+        const ctx=canvas.getContext("2d"),stream=canvas.captureStream(0),track=stream.getVideoTracks()[0];
+        const recorder=new MediaRecorder(stream,{mimeType:"video/webm"}),parts=[];
+        return new Promise((resolve,reject)=>{
+          let drawing,stop,frame=0;
+          const cleanup=()=>{clearInterval(drawing);clearTimeout(stop);stream.getTracks().forEach(item=>item.stop());};
+          recorder.ondataavailable=e=>{if(e.data.size)parts.push(e.data);};
+          recorder.onerror=()=>{cleanup();reject(new Error("Synthetic WebM recording failed"));};
+          recorder.onstop=async()=>{cleanup();resolve([...new Uint8Array(await new Blob(parts,{type:"video/webm"}).arrayBuffer())]);};
+          // A one-off paint before capture can produce a header-only WebM in headless Chrome.
+          // Submit frames after start(); waiting for onstart can itself wait for the first frame.
+          const draw=()=>{ctx.fillStyle=++frame%2?"#2255cc":"#3366dd";ctx.fillRect(0,0,64,64);track.requestFrame();};
+          recorder.start(100);draw();drawing=setInterval(draw,50);stop=setTimeout(()=>recorder.stop(),700);
+        });
+      });
       const selectedFixture = fixtureData.runs.find(run=>run.manifest.id===failed.id);
       fs.writeFileSync(path.join(selectedFixture.folder,"attachments","video.webm"),Buffer.from(video));
       const original=fingerprint(root); // This explicit fixture generation is the only data change.

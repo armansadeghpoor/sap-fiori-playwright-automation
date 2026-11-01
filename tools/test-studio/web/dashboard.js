@@ -12,7 +12,7 @@
     try {
       const response = await fetch(url, { credentials: "same-origin", cache: "no-store", ...options, signal: controller.signal });
       const data = await response.json();
-      if (!response.ok) { if (response.status === 401) { connected = false; $("login").hidden = false; $("dashboard").hidden = true; $("refresh").disabled = true; connection("locked", "نیاز به کد اتصال"); } throw new Error(data.error); }
+      if (!response.ok) { if (response.status === 401) { connected = false; $("login").hidden = false; $("dashboard").hidden = true; $("bridge-panel").hidden = true; $("refresh").disabled = true; connection("locked", "نیاز به کد اتصال"); } throw new Error(data.error); }
       return data;
     } catch (value) { if (value instanceof TypeError || value.name === "AbortError") { connection("offline", "Offline — آخرین دادهٔ دریافت‌شده"); throw new Error("ارتباط با سرویس محلی قطع است؛ دادهٔ نمایش‌داده‌شده تازه نیست."); } throw value; }
     finally { clearTimeout(timer); }
@@ -23,7 +23,7 @@
   $("theme").onclick = () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
   async function authenticate() {
     const status = await api("/api/session"); connected = true; csrf = status.csrf; instanceId=status.instanceId; $("stop-service").disabled=false; $("project").textContent = status.project + " · Explorer & History Management · Execution Manager";
-    $("login").hidden = true; $("dashboard").hidden = false; $("refresh").disabled = false; connection("online", "● Online"); await window.StudioExplorer.connect(api, mutation); await window.StudioExecution.connect(api, mutation, history, status.instanceId); return status;
+    $("login").hidden = true; $("dashboard").hidden = false; $("refresh").disabled = false; connection("online", "● Online"); await window.StudioExplorer.connect(api, mutation); await window.StudioExecution.connect(api, mutation, history, status.instanceId); if(window.StudioBridge){$("bridge-panel").hidden=false;void window.StudioBridge.connect(api,mutation);} return status;
   }
   $("login").onsubmit = async event => {
     event.preventDefault(); const button = $("login").querySelector("button"); button.disabled = true;
@@ -182,6 +182,7 @@
       for (let index = begin; index < end; index++) { const line = make("span", "", "line" + (index + 1 === result.line ? " active" : "")); line.dataset.line = index + 1; line.append(make("span", index + 1, "line-number"), make("span", lines[index] || " ", "line-code")); $("code-preview").append(line); }
     } catch (value) { if (ticket === sourceTicket) { $("code-preview").replaceChildren(); $("source-path").textContent = ""; $("source-note").textContent = value.message; } }
   }
+  $("open-vscode").onclick = () => { if(runId && testId) void window.StudioBridge.open({kind:"history",runId,testId}); };
   $("source").onclick = () => void source(); $("search").oninput = renderTests; $("filter").onchange = renderTests;
   $("refresh").onclick = async () => { try { await authenticate(); await history(); error(""); } catch (value) { error(value.message); } };
   async function check() { try { const was = connected; await authenticate(); if (!was) await history(); } catch (value) { if (connected) error(value.message); } }
