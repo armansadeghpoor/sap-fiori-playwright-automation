@@ -12,9 +12,9 @@ test("test", async ({ page }) => {
   await page.locator("a").filter({ hasText: "نویگیتور" }).click();
   await page.waitForTimeout(4000);
   await page.locator('fd-shellbar-context-area span[glyph="search"]').click();
-  await page.locator("#fd-input-group-input-id-0").fill("@@@");
+  await page.locator('input[fd-input-group-input][type="text"]').fill("@@@");
   await expect(page.getByRole('link', { name: 'تست @@@ سیستم ثبت درخواست ایشوها > برسا نوین رای > 3854' })).toBeVisible();
-  await page.locator("#fd-input-group-input-id-0").fill("$$$");
+  await page.locator('input[fd-input-group-input][type="text"]').fill("$$$");
   await expect(
     page.locator("a").filter({ hasText: "تست $$$Default" }),
   ).toBeVisible();

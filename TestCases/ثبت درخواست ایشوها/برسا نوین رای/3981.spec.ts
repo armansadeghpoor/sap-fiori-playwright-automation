@@ -23,7 +23,7 @@ test('test', async ({ page, context }) => {
 
   // ⭐️ تغییر کلیدی در این بخش است
   const [newTab] = await Promise.all([
-    context.waitForEvent('page'), // گوش دادن به رویداد باز شدن تب در کل مرورگر
+    context.waitForEvent('page'), // گوش دادن به رویداد باز شدن تب در کل مرورگر    at TestCases\ثبت درخواست ایشوها\برسا نوین رای\3981.spec.ts:26:13
     page.locator('div.tw-flex.tw-gap-1').first().click({ modifiers: ['Control'] })
   ]);
 

@@ -13,7 +13,7 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.getByText('تست مخصوص وب جدید', { exact: true }).click();
   await page.getByRole('link', { name: 'صفحه بندی در رابطه لیستی' }).click();
-  await page.getByRole('button', { name: 'جدید' }).click();
+  await page.getByRole('button', { name: 'جدید' }).last().click();
   await page.getByRole('button', { name: 'اضافه به لیست' }).click();
   await page.getByRole('button', { name: 'Page 2' }).click();
   await page.getByRole('button', { name: 'Page 3' }).click();

@@ -7,7 +7,9 @@ test("test", async ({ page }) => {
   await page
     .getByRole("heading", { name: "به هم ریختگی نما در مولتی سلکت ها" })
     .click();
-  await expect(page.locator('#fd-toolbar-3')).toMatchAriaSnapshot(`
+  await expect(page.locator(
+  'fd-toolbar:has(input[placeholder="جستجو"]):has(button[title="جدید"])'
+)).toMatchAriaSnapshot(`
     - toolbar:
       - button "تنظیمات"
       - button "جدید"

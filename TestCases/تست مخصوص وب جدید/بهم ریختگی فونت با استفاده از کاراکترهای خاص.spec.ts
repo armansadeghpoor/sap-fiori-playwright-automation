@@ -10,9 +10,9 @@ test("test", async ({ page, request }) => {
   await page.getByText("تست وب جدید").click();
   await page.getByText("بهم ریختگی فونت با کاراکتر های خاص").click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.getByRole("textbox").click();
+  await page.getByRole("textbox").first().click();
   await page
-    .getByRole("textbox")
+    .getByRole("textbox").first()
     .fill("سلام!تست@برسا#وب جدید$سیستم%فونت^تست&50*60*70");
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await expect(page.locator("bsu-column-renderer").nth(1)).toContainText(

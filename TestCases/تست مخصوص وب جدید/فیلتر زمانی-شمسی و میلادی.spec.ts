@@ -7,7 +7,10 @@ test("test", async ({ page }) => {
   await page
     .getByRole("heading", { name: "فیلتر بازه زمانی-شمسی و میلادی" })
     .click();
-  await page.locator("#fd-input-group-button-id-0").click();
+  await page.getByRole('button', {
+  name: 'Select Date Range',
+  exact: true
+}).first().click();
   await page.locator("a").filter({ hasText: "بازه زمانی دلخواه" }).click();
   await page.waitForTimeout(500);
   await page.getByRole('textbox', { name: 'از' }).click();

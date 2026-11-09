@@ -8,11 +8,24 @@ test("test", async ({ page }) => {
   await page.waitForTimeout(1000);
   await page.getByText("فرم مودال-تغییر تنظیمات پیش فرض فرآیند").dblclick();
   await page.waitForTimeout(2000);
-  await expect(await page.locator('fd-dialog-footer').last()).toContainText('انتخاب کنید ارسال ذخیره و بستن انصراف');
+  await expect(
+    page
+      .locator("fd-dialog-footer")
+      .last()
+      .getByText(
+        "انتخاب کنید Default Action ارسال Positive Action ذخیره و بستن انصراف",
+      ),
+  ).toBeVisible();
   await page.getByRole("button", { name: "انتخاب کنید" }).last().click();
   await page.locator("div nav").getByText("رد").click();
-  // await page.getByRole("button", { name: "ارسال" }).nth(3).click();
-  await page.locator('button.fd-button--positive[aria-label="ارسال"]').last().click();
-  await expect(page.getByText("ثبت درخواست ذخیره و بستن انصراف")).toBeVisible();
+
+  await page
+    .locator('button.fd-button--positive[aria-label="ارسال"]')
+    .last()
+    .click();
+
+  await expect(
+    page.getByText("ثبت درخواست Default Action ذخیره و بستن انصراف"),
+  ).toBeVisible();
   await page.getByRole("button", { name: "ثبت درخواست" }).click();
 });

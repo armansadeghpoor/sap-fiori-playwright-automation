@@ -20,8 +20,9 @@ test('test', async ({ page, request }) => {
   await expect(notifBadge).toHaveText('2');
   await page.getByRole('button', { name: 'Notification Label' }).click();
   await page.getByRole('button', { name: 'امروز', exact: true }).click();
-  await page.locator('button:has(.sap-icon--delete)').first().click();
+  await page.getByRole('button', { name: 'More', description: 'More' }).dblclick();
+  await page.getByRole('button', { name: 'حذف همه', exact: true }).click();
+  await page.getByRole('button', { name: 'بله' }).click();
   await page.waitForTimeout(1000);
-  await page.locator('button:has(.sap-icon--delete)').first().click();
   await expect(notifBadge).not.toBeVisible();
 });

@@ -19,6 +19,7 @@ test("test", async ({ page }) => {
   await page.locator("#headerCollapse").click();
   await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.getByText('سیستم تست کاربران', { exact: true }).click();
+  await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.getByText('کدنویسی وب').click();
   await page.locator("#headerCollapse").click();
   await page.getByRole('button', { name: 'App Launcher' }).click();

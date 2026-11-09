@@ -13,7 +13,9 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.getByText('تست ابزار', { exact: true }).click();
   await page.locator('#headerCollapse').click();
-  await expect(page.getByText('منو 2 گروهبندی دستور 4 گروه 1 گروه')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'منو' })).toBeVisible();
+  await page.getByRole('button', { name: 'گروه 1' }).click();
+  await expect(page.getByRole('button', { name: 'گروه 2' })).toBeVisible();
   await page.getByRole('button', { name: 'منو' }).click();
   await page.locator('a').filter({ hasText: 'گروه بندی دستور' }).click();
   await expect(page.locator('fd-dialog-body')).toContainText('گروه بندی دستور 3');

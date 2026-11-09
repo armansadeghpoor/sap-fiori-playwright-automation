@@ -8,13 +8,13 @@ test("test", async ({ page }) => {
   await page.getByText("تست وب جدید").click();
   await page.getByText("فرم مودال-تنظیمات پیش فرض فرآیند").click();
   await expect(
-    page.getByText("انتخاب کنید ارسال ذخیره و بستن انصراف")
+    page.getByText(
+      "انتخاب کنید Default Action ارسال Positive Action ذخیره و بستن انصراف",
+    ),
   ).toBeVisible();
   await page.getByRole("button", { name: "انتخاب کنید" }).click();
   await page.getByText("تایید").click();
   await page.getByRole("button", { name: "ارسال" }).click();
-  await expect(
-    page.locator("div").filter({ hasText: /^ثبت درخواستذخیره$/ })
-  ).toBeVisible();
+  await expect(page.getByText("ثبت درخواستPositive Actionذخیره")).toBeVisible();
   await page.getByRole("button", { name: "ثبت درخواست" }).click();
 });

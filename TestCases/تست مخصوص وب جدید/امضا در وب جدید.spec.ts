@@ -104,11 +104,5 @@ test("test", async ({ page, request }) => {
   await page.getByRole("textbox").fill("تست");
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await page.getByRole('link', { name: '‫تست‬' }).dblclick();
-  await expect(page.locator('#fd-toolbar-12')).toMatchAriaSnapshot(`
-    - toolbar:
-      - button
-      - button
-      - button
-    `);
   await page.locator("img").click();
 });

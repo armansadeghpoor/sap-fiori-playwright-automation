@@ -17,7 +17,13 @@ test("test", async ({ page, request }) => {
   await expect(
     page.getByRole("heading", { name: ": مدیریت نوتیفیکیشن" }),
   ).toBeVisible();
-  await expect(page.getByText('حذف همه بجز این هفتهحذف همه بجز امروزحذف همه')).toBeVisible();;
+  await expect(page.getByRole('button', { name: 'حذف همه بجز این هفته' })).toBeVisible();
+  await page.getByRole('button', { name: 'More', description: 'More' }).click();
+await expect(page.getByText('حذف همه بجز امروزحذف همه')).toBeVisible();
+  await page.getByRole('button', { name: 'حذف همه بجز امروز' }).click();
+  await page.getByRole('button', { name: 'خیر', exact: true }).click();
+  await page.getByRole('button', { name: 'Notification Label' }).click();
+  await page.getByRole('button', { name: 'More' }).click();
   await page.getByRole("button", { name: "حذف همه", exact: true }).click();
   await page.getByRole("button", { name: "بله" }).click();
   await page

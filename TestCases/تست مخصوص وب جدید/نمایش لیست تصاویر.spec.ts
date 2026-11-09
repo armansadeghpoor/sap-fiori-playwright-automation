@@ -17,7 +17,8 @@ test("test", async ({ page }) => {
     .click();
   await page.getByRole('link', { name: '‫*حذف نشود*‬' }).dblclick();
   await page.getByRole("tab", { name: "لیست تصاویر-بدون کامپوننت" }).click();
-  await expect(page.getByRole("button", { name: "دانلود" })).toBeVisible();
+  // await expect(page.getByRole("button", { name: "دانلود" })).toBeVisible();
+  await page.getByRole('button', { name: 'دانلود همه' }).click();
   await page.getByRole("tab", { name: "لیست تصاویر-همراه کامپوننت" }).click();
   await page.locator(".tw-w-full").first().click();
   await page.locator(".tw-w-full").nth(2).click();

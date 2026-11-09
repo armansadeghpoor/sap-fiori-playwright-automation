@@ -10,8 +10,8 @@ test("test", async ({ page }) => {
   await page.getByRole('link', { name: '‫*حذف نشود*‬' }).dblclick();
   await page.getByText("لایسنس سرور.pdf").click();
   await page.locator('fd-button-bar[glyph="resize"] button').click();
-  await page.getByRole('button', { name: 'close' }).click();
+  await page.getByRole('button', { name: 'close', exact: true }).click();
   await page.getByText("word.pdf").click();
   await page.locator('fd-button-bar[glyph="resize"] button').click();
-  await page.getByRole('button', { name: 'close' }).click();
+    await page.getByRole('button', { name: 'close', exact: true }).click();
 });

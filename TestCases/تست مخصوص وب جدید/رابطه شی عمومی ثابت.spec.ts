@@ -13,11 +13,11 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.getByText('تست مخصوص وب جدید', { exact: true }).click();
   await page.getByRole('link', { name: 'رابطه شی عمومی ثابت' }).click();
-  await page.getByRole('button', { name: 'جدید' }).click();
+  await page.getByRole('button', { name: 'جدید' }).last().click();
   await page.getByRole('combobox', { name: 'Select an Option' }).click();
   await page.locator('span').filter({ hasText: 'موجویت مقصد تستی برای روابط' }).nth(1).click();
   await page.getByRole('combobox', { name: 'انتخاب کنید' }).click();
-  await page.getByLabel('جستجو').click();
+  await page.getByLabel('جستجو').last().click();
   await expect(page.locator('a').filter({ hasText: '‫تست1‬' })).toBeVisible();
   await page.getByRole('button', { name: 'close' }).last().click();
   await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
@@ -27,7 +27,7 @@ test('test', async ({ page }) => {
   await page.getByRole('combobox', { name: 'Select an Option' }).click();
   await page.locator('span').filter({ hasText: 'پریدن صفحه بندی بعد از رفرش' }).nth(2).click();
   await page.getByRole('combobox', { name: 'انتخاب کنید' }).click();
-  await page.getByLabel('جستجو').click();
+  await page.getByLabel('جستجو').last().click();
   await expect(page.locator('a').filter({ hasText: '‫تست 1‬' })).toBeVisible();
   await page.getByRole('button', { name: 'close' }).last().click();
   await page.getByRole('button', { name: 'navigation-down-arrow' }).click();

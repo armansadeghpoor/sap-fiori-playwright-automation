@@ -7,12 +7,9 @@ test("test", async ({ page }) => {
   await page.locator(".fd-avatar__icon").click();
   await page.getByRole("menuitem", { name: "نویگیتور" }).click();
   await page.getByRole('button', { name: 'App Launcher' }).click();
-  await page
-    .getByRole("listitem")
-    .filter({ has: page.getByText("تست مخصوص وب جدید", { exact: true }) })
-    .click();
+  await page.getByText('تست مخصوص وب جدید', { exact: true }).click();
   await page.getByRole("link", { name: "تست نمای چندصفحه ای" }).click();
-  await page.getByRole("button", { name: "جدید" }).click();
+  await page.getByRole("button", { name: "جدید" }).last().click();
   await expect(page.getByRole("button", { name: "بیشتر" })).toBeVisible();
   await page.getByRole("button", { name: "بیشتر" }).click();
   await page

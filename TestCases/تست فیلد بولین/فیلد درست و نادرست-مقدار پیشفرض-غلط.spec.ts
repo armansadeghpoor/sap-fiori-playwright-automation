@@ -11,14 +11,12 @@ test("test", async ({ page }) => {
     .locator("bsu-layout-control")
     .filter({ hasText: "نام کاربری*" })
     .getByRole("textbox")
-    .fill("ر");
+    .fill("راهبر");
   await page
     .locator("bsu-layout-control")
     .filter({ hasText: "نام کاربری*" })
     .getByRole("textbox")
-    .click();
-  await page.getByRole("textbox", { name: "ر" }).fill("راهبر");
-  await page.getByRole("textbox", { name: "ر" }).press("Tab");
+    .press("Tab");
   await page.getByRole("textbox", { name: "xxxxxxx" }).fill("123");
   await page.getByRole("button", { name: "ورود" }).click();
   await page.getByRole("button", { name: "Navigation" }).click();

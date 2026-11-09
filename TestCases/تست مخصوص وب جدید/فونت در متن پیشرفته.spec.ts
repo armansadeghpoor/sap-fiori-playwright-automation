@@ -9,7 +9,7 @@ test("test", async ({ page }) => {
   await page.getByRole('button', { name: 'App Launcher' }).click();
  await page.getByText('تست مخصوص وب جدید', { exact: true }).click();
   await page.getByRole("link", { name: "نشانه گذاری متن پیشرفته" }).click();
-  await page.getByRole("button", { name: "جدید" }).click();
+  await page.getByRole("button", { name: "جدید" }).last().click();
   await page.getByRole("button", { name: "Font B-Font" }).click();
   await page.getByLabel("B-Font", { exact: true }).getByText("B-Font").click();
   await page

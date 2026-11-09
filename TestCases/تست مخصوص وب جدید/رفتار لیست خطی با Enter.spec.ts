@@ -14,7 +14,7 @@ test("test", async ({ page }) => {
   await page.getByText("تست مخصوص وب جدید", { exact: true }).click();
   // await page.getByTitle("سیستم تست وب جدید").click();
   await page.getByRole("link", { name: "رفتار لیست خطی با Enter" }).click();
-  await page.getByRole("button", { name: "جدید" }).click();
+  await page.getByRole("button", { name: "جدید" }).last().click();
   await page.getByRole("textbox", { name: "Multi Value Input" }).click();
   await page.getByRole("textbox", { name: "Multi Value Input" }).fill("تست");
   await page

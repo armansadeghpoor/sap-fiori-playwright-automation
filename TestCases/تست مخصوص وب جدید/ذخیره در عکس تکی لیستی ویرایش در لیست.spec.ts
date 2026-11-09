@@ -19,8 +19,8 @@ test('test', async ({ page, request }) => {
   await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.getByText('تست مخصوص وب جدید', { exact: true }).click();
   await page.getByRole('link', { name: 'ذخیره در عکس تکی لیستی' }).click();
-  await page.getByRole('button', { name: 'جدید' }).click();
-  await page.getByRole('button', { name: 'جدید' }).click();
+  await page.getByRole('button', { name: 'جدید' }).last().click();
+  await page.getByRole('button', { name: 'جدید' }).last().click();
   const titleColumns = page.locator('bsu-barsa-table-column')
     .filter({ has: page.locator('[caption="عنوان"]') });
   await titleColumns.nth(0).locator('input[type="text"]').fill('تست1');

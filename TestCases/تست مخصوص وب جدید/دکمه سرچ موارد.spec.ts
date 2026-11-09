@@ -13,10 +13,10 @@ test("test", async ({ page }) => {
   await page.waitForTimeout(10000);
   await page.locator('fd-shellbar-context-area span[glyph="search"]').click();
   await page
-    .locator('#fd-input-group-input-id-0')
-    .pressSequentially("wizard", { delay: 100 });
+      .locator('input[fd-input-group-input][type="text"]')
+      .pressSequentially("wizard", { delay: 100 });
   await page.getByRole('button', { name: 'همه 1' }).click();
-  await page.getByRole('button', { name: 'گزارشات' }).click();
+  await page.getByRole('button', { name: 'گزارشات' }).last().click();
   await page.getByRole('link', { name: 'تست نما Wizard' }).click();
   await expect(
     page.getByLabel("Breadcrumb Trail").getByText("تست نما Wizard")
