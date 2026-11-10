@@ -51,3 +51,24 @@ dialog{max-width:min(650px,calc(100vw - 32px));max-height:90vh;overflow:auto;bac
 .empty-results{grid-column:1/-1;padding:var(--ps-space-4);text-align:center}
 
 @media(max-width:540px){.navigation #nav-links .nav-label{display:none}}
+
+/* Final polish: preserve diagnostic bytes; direction is presentation only. */
+#failure-message,#run-errors,#stack,#code-preview,#test-meta,#run-id,#source-path{direction:ltr;unicode-bidi:isolate;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere}
+.metric-hint{display:block;direction:rtl;text-align:left;color:var(--ps-text-muted);margin-top:var(--ps-space-1)}
+#summary-note{margin-block:var(--ps-space-2) var(--ps-space-3);direction:rtl;text-align:right;unicode-bidi:isolate}
+.bridge-panel{gap:var(--ps-space-1) var(--ps-space-3);padding-block:var(--ps-space-2);margin-bottom:var(--ps-space-4)}
+.bridge-panel .toolbar{gap:var(--ps-space-2)}.bridge-panel button,.bridge-panel select{padding-block:var(--ps-space-1);min-height:30px}
+.bridge-panel>p:last-child{width:auto;flex:1 1 260px}.bridge-panel #bridge-status{flex:1 1 280px}
+.execution-panel[data-compact=true]:not(:has(#execution-error:not(:empty))){display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--ps-space-2);align-items:center;padding-block:var(--ps-space-3)}
+.execution-panel[data-compact=true] .heading{grid-column:1/-1;margin:0}.execution-panel[data-compact=true] #stream-status,.execution-panel[data-compact=true] #execution-status{margin:0}
+.execution-panel[data-compact=true] label{display:flex;align-items:center;flex-wrap:wrap;gap:var(--ps-space-1);grid-column:1/-1}
+.execution-panel[data-compact=true] #execution-headed{margin:0;min-width:0;padding-block:var(--ps-space-1)}
+.execution-panel[data-compact=true] #execution-stop{grid-column:2;grid-row:4;padding-block:var(--ps-space-1);min-height:30px}
+
+/* Keep the Bridge controls on their own row instead of squeezing the toolbar. */
+.bridge-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}
+.bridge-panel .toolbar{grid-column:1/-1;min-width:0}.bridge-panel #bridge-result{grid-column:1/-1;order:1}
+@media(max-width:700px){.bridge-panel{grid-template-columns:minmax(0,1fr)}}
+
+#cli-log { max-height: 220px; overflow: auto; white-space: pre-wrap; direction: ltr; unicode-bidi: isolate; text-align: left; }
+#editor-safety:empty { display: none; }

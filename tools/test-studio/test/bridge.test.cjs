@@ -12,10 +12,10 @@ const { createService } = require('../service/server.cjs');
 const { records } = require('../bridge/registry.cjs');
 function mock() {
   const docs = new Map(), opened = [];
-  return { docs, opened, workspace: { name: 'Fixture', async openTextDocument(uri) {
+  return { docs, opened, workspace: { name: 'Fixture', get textDocuments() { return [...docs.values()]; }, async openTextDocument(uri) {
     if (!docs.has(uri.fsPath)) docs.set(uri.fsPath, { uri, isDirty: false, getText() { return this.buffer ?? fs.readFileSync(uri.fsPath, 'utf8'); } });
     return docs.get(uri.fsPath);
-  } }, Uri: { file: fsPath => ({ fsPath }) }, Range: class { constructor(line, column) { this.start = { line, character: column }; } }, ViewColumn: { Active: -1 }, TextEditorRevealType: { InCenterIfOutsideViewport: 2 }, TabInputText: class {}, window: { visibleTextEditors: [], tabGroups: { all: [] }, async showTextDocument(document, options) { opened.push({ document, options }); return { revealRange() {} }; } } };
+  } }, Uri: { file: fsPath => ({ fsPath, scheme: "file" }) }, Range: class { constructor(line, column) { this.start = { line, character: column }; } }, ViewColumn: { Active: -1 }, TextEditorRevealType: { InCenterIfOutsideViewport: 2 }, TabInputText: class {}, window: { visibleTextEditors: [], tabGroups: { all: [] }, async showTextDocument(document, options) { opened.push({ document, options }); return { revealRange() {} }; } } };
 }
 async function setup(t) {
   const root = fixture(); t.after(() => cleanup(root));

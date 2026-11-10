@@ -36,9 +36,11 @@
     for (const id of selectedRuns) if (!runs.some(run => run.id === id && run.deletable)) selectedRuns.delete(id);
     if (runId && !runs.some(run => run.id === runId)) {
       runId = ""; testId = ""; detail = null; runTicket++; sourceTicket++;
-      $("run-title").textContent = "یک Run را انتخاب کنید"; $("run-id").textContent = ""; $("metrics").replaceChildren(); $("summary-scope").textContent = "یک Run از History انتخاب کنید · مستقل از Catalog"; $("tests").replaceChildren();
+      $("run-title").textContent = "یک Run را انتخاب کنید"; $("run-id").textContent = ""; $("metrics").replaceChildren(); $("summary-note").hidden = true; $("summary-scope").textContent = "یک Run از History انتخاب کنید · مستقل از Catalog"; $("tests").replaceChildren();
       $("run-note").hidden = true; $("run-errors").hidden = true; $("test-detail").hidden = true; $("inspect-empty").hidden = false;
-      $("media").replaceChildren(); $("code-preview").replaceChildren();
+      $("attempts").replaceChildren(); $("media").replaceChildren(); $("code-preview").replaceChildren(); $("artifacts").replaceChildren();
+      for (const id of ["test-title", "test-meta", "test-outcome", "failure-message", "stack", "source-note", "source-path", "run-note", "run-errors", "summary-note"]) $(id).textContent = "";
+      rerunIds.clear(); rerunControls();
     }
     $("empty").hidden = Boolean(runs.length);
     if (!runs.length) { $("summary-scope").textContent = "History خالی است · مستقل از Catalog"; $("metrics").replaceChildren(make("div", "هنوز Run ثبت‌شده‌ای وجود ندارد.", "empty-summary")); }
@@ -65,11 +67,15 @@
     $("test-detail").hidden = true; $("inspect-empty").hidden = false; $("tests").replaceChildren();
     const value = await api("/api/runs/" + encodeURIComponent(id)); if (ticket !== runTicket) return;
     detail = value; $("run-title").textContent = value.label; $("run-id").textContent = value.id; $("summary-scope").textContent = `Run: ${value.label} · #${value.id.slice(-6)} · Duration ${duration(value.duration)}`;
+    const otherLabels = { interrupted: "Interrupted", notRun: "اجرای ثبت‌نشده (notRun)", unfinished: "پایان ثبت‌نشده (unfinished)" };
+    const other = Object.entries(otherLabels).filter(([key]) => Number.isFinite(value.counts[key]) && value.counts[key] > 0).map(([key, label]) => `${label}: ${value.counts[key]}`);
+    $("summary-note").hidden = false;
+    $("summary-note").textContent = (value.complete ? "" : "این Run نهایی نشده است. ") + "Planned Tests تعداد تست‌های انتخاب‌شده در Run است؛ Passed، Failed و Skipped فقط نتایج ثبت‌شده‌اند و لزوماً جمع آن‌ها برابر کل نیست." + (other.length ? "\nسایر وضعیت‌ها: " + other.join(" · ") : "") + (!value.complete ? "\nاز این مقادیر، وضعیت فعلی Process یا نتیجهٔ ثبت‌نشده حدس زده نمی‌شود." : "");
     $("run-note").hidden = value.complete; $("run-note").textContent = "این Run کامل بسته نشده است؛ مقادیر فقط آخرین ثبت موجود هستند و وضعیت Process از آن‌ها حدس زده نمی‌شود.\n" + (value.message || "");
     $("run-errors").textContent = (value.errors || []).join("\n\n"); $("run-errors").hidden = !value.errors?.length;
     $("metrics").replaceChildren();
-    for (const [name, count] of [["Total Tests", value.total], ["Passed", value.counts.passed], ["Failed", value.counts.failed], ["Skipped", value.counts.skipped]]) {
-      const metric = make("div", "", "metric"); metric.dataset.kind = name.toLowerCase().replace(/ /g,"-"); metric.append(make("span", name), make("b", count ?? "—")); $("metrics").append(metric);
+    for (const [name, count] of [["Planned Tests", value.total], ["Passed", value.counts.passed], ["Failed", value.counts.failed], ["Skipped", value.counts.skipped]]) {
+      const metric = make("div", "", "metric"); metric.dataset.kind = name.toLowerCase().replace(/ /g,"-"); metric.append(make("span", name), make("b", count ?? "—"), make("small", name === "Planned Tests" ? "فهرست انتخاب‌شدهٔ Run" : "نتیجهٔ ثبت‌شده", "metric-hint")); $("metrics").append(metric);
     }
     $("search").value = ""; $("filter").value = "all"; renderTests(); error("");
     const first = value.tests.find(test => test.outcome === "failed") || value.tests[0]; if (first) selectTest(first);
@@ -131,7 +137,11 @@
     } catch (value) { $("history-confirm").close(); error(value.message); await history().catch(() => {}); }
     finally { mutationBusy = false; $("cancel-history").disabled = false; historyControls(); }
   };
+  $('open-report').onclick = () => window.StudioBridge.artifact('report', runId);
+  $('open-archive').onclick = () => window.StudioBridge.artifact('archive', runId);
   function rerunControls() {
+    $('open-report').disabled = !detail?.report; $('open-report').title = detail?.report ? '' : 'گزارش HTML معتبر موجود نیست';
+    $('open-archive').disabled = !detail;
     $("rerun-count").textContent = `${rerunIds.size} انتخاب Rerun`;
     $("rerun-failed").disabled = !detail?.complete || !detail.tests.some(t=>t.outcome==='failed');
     $("rerun-selected").disabled = !detail?.complete || !rerunIds.size;
@@ -161,9 +171,16 @@
     $("test-outcome").textContent = labels[test.outcome] || test.outcome; $("test-outcome").className = "badge " + test.outcome; $("failure-message").className = test.errors.length ? "error" : test.outcome; $("test-title").textContent = test.title; $("test-meta").textContent = `${test.project} · ${test.displayPath} · ${test.id}`;
     $("failure-message").textContent = test.errors.map(item => item.message).join("\n\n") || (labels[test.outcome] || test.outcome);
     $("stack").textContent = test.errors.map(item => item.stack).join("\n\n"); $("stack-section").hidden = !test.errors.length;
+    $("attempts").replaceChildren();
+    for (const attempt of test.attempts || []) {
+      const section = make('details'), heading = make('summary', `Attempt ${attempt.index + 1} · Retry ${attempt.retry ?? '?'} · ${attempt.status} · ${duration(attempt.duration)}`);
+      const pre = make('pre', attempt.errors.map(e => [e.message, e.stack].filter(Boolean).join('\n')).join('\n\n')); pre.dir = 'ltr'; pre.className = 'technical';
+      section.append(heading, pre); $('attempts').append(section);
+    }
     $("media").replaceChildren(); $("artifacts").replaceChildren(); $("code-preview").replaceChildren(); $("source-note").textContent = "";
     for (const item of test.attachments) {
       const url = `/api/runs/${encodeURIComponent(runId)}/artifacts/${item.id}`;
+      if (item.trace) { const viewer = make('button', 'Open Trace Viewer'); viewer.type = 'button'; viewer.onclick = () => window.StudioBridge.artifact('trace', runId, item.id); $('artifacts').append(viewer); }
       if (item.kind === "download") { const link = make("a", "دانلود " + item.name); link.href = url; link.download = ""; $("artifacts").append(link); }
       else {
         const button = make("button", item.kind === "image" ? "نمایش Screenshot" : "نمایش Video"); button.type = "button";
@@ -210,6 +227,6 @@
  $('drawer-close').onclick = () => drawer.close();
  drawer.addEventListener('close', () => { $('inspector-slot').append(panel); $('inspector-expand').hidden = false; $('inspector-expand').focus(); });
  window.StudioVisual = {
-  execution(operation) { $('execution-panel').dataset.phase = operation.phase; const p = operation.progress, meter = $('execution-meter'); meter.hidden = !p; if (p) { meter.max = Math.max(1,p.total || 0); meter.value = p.completed || 0; } }
+  execution(operation) { $('execution-panel').dataset.phase = operation.phase; $('execution-panel').dataset.compact = String(operation.phase === 'Idle' && !operation.busy && !operation.canConfirm && !operation.error && !operation.progress); const p = operation.progress, meter = $('execution-meter'); meter.hidden = !p; if (p) { meter.max = Math.max(1,p.total || 0); meter.value = p.completed || 0; } }
  };
 })();

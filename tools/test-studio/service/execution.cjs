@@ -5,13 +5,14 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/u;
 const fields = (x, keys) => x && typeof x === 'object' && !Array.isArray(x) && Object.keys(x).every(k => keys.includes(k));
 const identity = t => JSON.stringify([t.id,t.project,t.file,t.listFile,t.titles,t.line,t.column,t.sourceHash]);
 class Execution {
-  constructor(repository, catalog, { ttl = 120000, prepareTimeout = 90000 } = {}) {
+  constructor(repository, catalog, { ttl = 120000, prepareTimeout = 90000, editorGuard, secrets = () => [] } = {}) {
     this.repository = repository; this.catalog = catalog; this.ttl = ttl; this.prepareTimeout = prepareTimeout;
+    this.editorGuard = editorGuard; this.secrets = secrets;
     this.requests = new Map(); this.current = null; this.closed = false;
   }
   view(op, session) {
-    const { manager, session: owner, resolve, timer, pending, baseline, tests, input, ...publicValue } = op;
-    return { ...publicValue, canConfirm: owner === session && op.phase === 'Awaiting Confirmation',
+    const { manager, session: owner, resolve, timer, pending, baseline, tests, input, logs, ...publicValue } = op;
+    return { ...publicValue, cliLog: op.logs?.text || "", canConfirm: owner === session && op.phase === 'Awaiting Confirmation',
       confirmation: owner === session ? op.confirmation : null };
   }
   get(session) {
@@ -60,17 +61,25 @@ class Execution {
   async run(op) {
     const { RegressionManager } = require('../regression/manager.cjs');
     const check = () => { if (this.catalog.scan() !== op.baseline) throw fail(409,'Source / configuration changed; select again.'); };
+    op.logs = new (require('./log.cjs').CliLog)(() => [...this.secrets(), ...Object.entries(process.env).filter(([key]) => /password|passwd|token|secret|credential|api.?key/iu.test(key)).map(([,value]) => value)]);
+    const inspect = async () => {
+      const next = await this.editorGuard?.(op.tests) || { verified: false, message: 'Editor inspection unavailable; only saved files on disk will run.' };
+      if (op.editorSafety?.verified && !next.verified) throw fail(409, 'Bridge disconnected after editor validation; execution blocked. Reconnect and select again.');
+      op.editorSafety = next; return true;
+    };
     const manager = op.manager = new RegressionManager({root:()=>this.repository.root,node:()=>process.execPath,
+      prepare: inspect,
+      output: (chunk, stream) => op.logs.append(chunk, stream), outputEnd: () => op.logs.flush(),
       acquireLock:root=>{try { const release=maintenanceLock(root); return {recorder:release.recorder,release}; } catch(e) {op.phase='Ownership Unknown';throw e;}},
       validateCatalog:async catalog=>{
         check(); const current=this.catalog.validate(catalog), byId=new Map(current.map(t=>[t.id,t]));
         if (op.tests.some(t=>!byId.has(t.id)||identity(t)!==identity(byId.get(t.id)))) throw fail(409,'Exact selection identity/source changed.');
         if (op.scope==='suite' && current.length!==op.tests.length) throw fail(409,'Suite changed.');
       },
-      confirmExecution:async()=>{clearTimeout(preparation);return this.wait(op,'execution');},
+      confirmExecution:async()=>{await inspect();clearTimeout(preparation);return this.wait(op,'execution');},
       alwaysConfirmSnapshot:true,verifySelection:true,
       confirmSnapshot:async()=>this.wait(op,'snapshot'),
-      beforeRun:async()=>{check();op.phase='Preparing';},
+      beforeRun:async()=>{check();await inspect();op.phase='Preparing';},
       state:state=>{
         if(state.runId)op.runId=state.runId;
         if(state.progress)op.progress=state.progress;
@@ -85,9 +94,9 @@ class Execution {
       if(result)op.result={runId:result.manifest.id,status:result.summary.status,counts:result.summary.counts};
     } catch(error) {
       if(op.phase!=='Ownership Unknown')op.phase=manager.stopRequested?'Interrupted':'Failed';
-      op.error={code:op.phase==='Ownership Unknown'?'OWNERSHIP_UNKNOWN':'EXECUTION_FAILED',message:String(error.message).slice(0,4000)};
+      op.error={code:op.phase==='Ownership Unknown'?'OWNERSHIP_UNKNOWN':'EXECUTION_FAILED',message:op.logs.redact(String(error.message)).slice(0,4000)};
     } finally {
-      clearTimeout(preparation);clearTimeout(op.timer);op.confirmation=null;op.busy=false;op.finishedAt=Date.now();
+      op.logs.flush();clearTimeout(preparation);clearTimeout(op.timer);op.confirmation=null;op.busy=false;op.finishedAt=Date.now();
     }
   }
   wait(op, kind) {
@@ -95,7 +104,7 @@ class Execution {
     op.phase='Awaiting Confirmation';
     op.confirmation={kind,token:crypto.randomUUID(),expiresAt:Date.now()+this.ttl,
       message:kind==='snapshot'?'تأیید مستقل Snapshot: تست‌ها و Helperهای واردشده ممکن است RestoreSnapshot و تغییر Backend داشته باشند. آیا این پیامدها را برای همین انتخاب مجاز می‌دانید؟':
-        `تأیید اجرای ${op.count} تست (${op.scope}) با حالت ${op.headed?'Headed':'Headless'}. کد تست و Hookها می‌توانند دادهٔ برنامه را تغییر دهند.`};
+        `تأیید اجرای ${op.count} تست (${op.scope}) با حالت ${op.headed?'Headed':'Headless'}. کد تست و Hookها می‌توانند دادهٔ برنامه را تغییر دهند.\n${op.editorSafety?.message || ""}`};
     return new Promise(resolve=>{op.resolve=resolve;op.timer=setTimeout(()=>this.settle(op,false),this.ttl);});
   }
   settle(op,value) {clearTimeout(op.timer);op.confirmation=null;const resolve=op.resolve;op.resolve=null;resolve?.(value);}

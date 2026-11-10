@@ -9,6 +9,8 @@
     window.StudioVisual?.execution(operation);
     const p=operation.progress;
     $('execution-progress').textContent=p?`${p.completed}/${p.total} · Passed ${p.counts?.passed||0} · Failed ${p.counts?.failed||0} · Skipped ${p.counts?.skipped||0} · ${((p.elapsed||0)/1000).toFixed(1)}s · ${p.current||''}`:'';
+    $('cli-section').hidden=!operation.cliLog; $('cli-log').textContent=operation.cliLog||'';
+    $('editor-safety').textContent=operation.editorSafety?.message||'';
     $('execution-error').textContent=operation.error?`${operation.error.code}: ${operation.error.message}`:'';
     $('execution-stop').disabled=!operation.busy||!operation.id;
     $('execution-confirm').hidden=!operation.canConfirm;

@@ -1,3 +1,13 @@
+# Playwright Test Studio 0.6.0 — Studio baseline
+
+Version 0.6.0 is the Studio baseline for subsequent work. User manual acceptance succeeded; the final release also fixes the selected-last-Run History refresh regression and permanently tests empty and nonempty History cleanup. **Regression Execution Manager, Recorder and New Test Generator remain active.**
+
+The release includes persistent VS Code tabs, native HTML Report / Trace Viewer / archive actions, cancellable discovery, explicit dirty-editor protection, bounded redacted real CLI output, all recorded attempts, approved Summary/RTL/Idle UI Polish and Recorder encoding regression coverage. See [Release Notes and remaining gaps](RELEASE_NOTES.md), [Bridge security and usage](BRIDGE.md), and [the complete 33-feature matrix](FEATURE_PARITY_AUDIT.md). Historical rerun after source changes and custom standalone Node configuration remain unresolved. UI retirement is not authorized.
+
+The VSIX contains Extension assets; Standalone Service/Dashboard assets run from repository source. Installation is manual. Stop the old Service using its own action only while Run/Discovery are idle, then reopen the existing shortcut; do not delete descriptors or locks.
+
+---
+
 # Playwright Test Studio 0.5.0 — Hybrid Developer Command Center
 
 Standalone visual redesign. Manual acceptance succeeded for refresh, Dark/Light, collapsible navigation, Inspector/Escape, Source/Artifacts/Open in VS Code, and Summary/History. Dark-first and Light themes, responsive navigation, selected-run summary, and an expanded Inspector. Runner, service security, data formats, and Bridge protocol are unchanged. See [UI design and validation](UI_DESIGN.md). The Standalone Dashboard is served from the repository; installing the VSIX alone does not replace those web assets. The 0.4.0 installed extension remains compatible.

@@ -15,7 +15,7 @@ async function until(fn) { const end = Date.now() + 60000; while (!fn()) { if (D
   const history = new History(root), old = history.create({ scope: 'fixture', tests: [{ id: 'seed', title: 'old synthetic result', file: source, line: 2, column: 1, sourceHash: hashFile(source) }] });
   history.finalize(old, { complete: true, status: 'passed', tests: [{ id: 'seed', outcome: 'passed', attempts: [] }] });
   const original = fs.readFileSync(path.join(old.folder, 'summary.json')), directory = path.join(root, 'bridges'), opened = [];
-  const vscode = { workspace: { name: 'Execution fixture', openTextDocument: async uri => ({ uri, isDirty: false, getText: () => fs.readFileSync(uri.fsPath, 'utf8') }) }, Uri: { file: fsPath => ({ fsPath }) }, Range: class {}, TabInputText: class {}, ViewColumn: { Active: -1 }, TextEditorRevealType: { InCenterIfOutsideViewport: 2 }, window: { visibleTextEditors: [], tabGroups: { all: [] }, async showTextDocument(document) { opened.push(document.uri.fsPath); return { revealRange() {} }; } } };
+  const vscode = { workspace: { textDocuments: [], name: 'Execution fixture', openTextDocument: async uri => ({ uri, isDirty: false, getText: () => fs.readFileSync(uri.fsPath, 'utf8') }) }, Uri: { file: fsPath => ({ fsPath }) }, Range: class {}, TabInputText: class {}, ViewColumn: { Active: -1 }, TextEditorRevealType: { InCenterIfOutsideViewport: 2 }, window: { visibleTextEditors: [], tabGroups: { all: [] }, async showTextDocument(document) { opened.push(document.uri.fsPath); return { revealRange() {} }; } } };
   const host = await new BridgeHost(vscode, () => root, { directory }).start(); let app;
   try {
     app = await createService({ root, bridgeOptions: { directory } });

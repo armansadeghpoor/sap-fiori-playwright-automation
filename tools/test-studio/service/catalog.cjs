@@ -81,13 +81,14 @@ class Catalog {
     let before;
     try { before = this.scan(true); } catch (error) { release(); throw error; }
     this.releaseOwnedLock = release;
-    this.value = { ...this.value, phase: "discovering", error: null };
+    const previous = this.value, operation = this.operation = { id: crypto.randomUUID(), controller: new AbortController(), cancelled: false };
+    this.value = { ...this.value, phase: "discovering", discoveryId: operation.id, discoveryOutcome: null, error: null };
     this.pending = Promise.resolve().then(async () => {
-      let timer;
+      let timer, cancelledValue;
       try {
-        if (this.closed) throw fail(409, "سرویس در حال بسته‌شدن است.");
+        if (this.closed || operation.cancelled) throw fail(409, "سرویس در حال بسته‌شدن است.");
         let begin;
-        if (this.discoverFixture) begin = await this.discoverFixture();
+        if (this.discoverFixture) begin = await this.discoverFixture({ signal: operation.controller.signal });
         else {
           // Lazy load: GET /catalog never imports CLI/config/spec modules.
           const { RegressionManager } = require("../regression/manager.cjs");
@@ -96,20 +97,31 @@ class Catalog {
           timer = setTimeout(() => { void this.manager.stop().catch(() => {}); }, this.timeout);
           begin = await this.manager.catalog(this.root, { recorder: release.recorder }, { allowEmpty: true });
         }
+        if (operation.cancelled || this.closed) throw Error("Discovery cancelled");
         const tests = this.validate(begin);
         if (before.fingerprint !== this.scan()) throw fail(409, "فایل‌ها هنگام Discovery تغییر کردند؛ نتیجه پذیرفته نشد.");
         this.fingerprint = before.fingerprint;
         this.value = { phase: "ready", catalogRevision: crypto.randomUUID(), tests, entries: before.entries, updatedAt: new Date().toISOString(), error: null };
       } catch (error) {
-        this.value = { ...this.value, phase: "error", error: String(error.message || "Discovery ناموفق بود.").slice(-4000) };
+        if (operation.cancelled) cancelledValue = { ...previous, discoveryOutcome: "cancelled", discoveryId: null, cancelRequested: false };
+        else this.value = { ...this.value, discoveryId: null, phase: "error", discoveryOutcome: "failed", error: String(error.message || "Discovery ناموفق بود.").slice(-4000) };
       } finally {
         clearTimeout(timer);
-        try { await this.cleanupOwned(); }
+        try { await this.cleanupOwned(); if (cancelledValue) this.value = cancelledValue; }
         catch { this.value = { ...this.value, phase: "error", error: "توقف پردازش متعلق به Discovery تأیید نشد؛ قفل حفظ شد. وضعیت را از ترمینال سرویس بررسی کنید." }; }
         this.pending = null;
       }
     });
-    return { accepted: true, phase: "discovering" };
+    return { accepted: true, phase: "discovering", discoveryId: operation.id };
+  }
+  cancel(input) {
+    if (!object(input) || Object.keys(input).join(',') !== 'discoveryId' || typeof input.discoveryId !== 'string') throw fail(400, 'Discovery ID required.');
+    if (!this.pending || input.discoveryId !== this.operation?.id) throw fail(409, 'No matching discovery.');
+    if (this.operation.cancelled) return { accepted: true, discoveryId: this.operation.id };
+    this.value = { ...this.value, cancelRequested: true };
+    this.operation.cancelled = true; this.operation.controller.abort();
+    if (this.manager) void this.manager.stop().catch(() => {});
+    return { accepted: true, discoveryId: this.operation.id };
   }
   resolve(input) {
     if (!object(input) || Object.keys(input).some(key => !["catalogRevision", "ids"].includes(key)) ||
@@ -126,6 +138,6 @@ class Catalog {
     if (this.manager) this.manager.busy = false;
     this.manager = null; this.releaseOwnedLock?.(); this.releaseOwnedLock = null;
   }
-  async close() { this.closed = true; if (this.manager) await this.manager.stop(); if (this.pending) await this.pending; await this.cleanupOwned(); }
+  async close() { this.closed = true; this.operation?.controller.abort(); if (this.manager) await this.manager.stop(); if (this.pending) await this.pending; await this.cleanupOwned(); }
 }
 module.exports = { Catalog };

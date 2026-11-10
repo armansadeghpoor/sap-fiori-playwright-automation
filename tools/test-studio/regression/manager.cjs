@@ -43,6 +43,7 @@ class RegressionManager {
       child.stdout.setEncoding("utf8"); child.stderr.setEncoding("utf8");
       const streams = outputFolder ? ["stdout", "stderr"].map(name => fs.openSync(path.join(outputFolder, name + ".log"), "wx")) : [];
       const output = (chunk, index) => {
+        this.host.output?.(chunk, index === 0 ? "stdout" : "stderr");
         try { if (streams[index] !== undefined) fs.writeSync(streams[index], chunk); }
         catch (error) { outputError = error; void this.stop().catch(() => {}); }
         this.publish({ log: (this.state.log + chunk.toString("utf8").replace(/\x1b\[[0-?]*[ -/]*[@-~]/gu, "")).slice(-16000) });
@@ -51,6 +52,7 @@ class RegressionManager {
       child.stderr.on("data", chunk => output(chunk, 1));
       child.on("error", error => { outputError = error; });
       child.on("close", code => {
+        this.host.outputEnd?.();
         for (const fd of streams) fs.closeSync(fd);
         this.child = null;
         if (outputError) reject(outputError); else resolve(code);

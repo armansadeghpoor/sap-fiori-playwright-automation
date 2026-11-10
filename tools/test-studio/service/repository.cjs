@@ -65,7 +65,7 @@ class Repository {
       const format = formats[path.extname(relative).toLowerCase()];
       if (!format || (format[1] !== "download" && attachment.contentType !== format[0])) return [];
       const id = crypto.createHash("sha256").update(JSON.stringify([test.id, ai, index, relative])).digest("hex").slice(0, 24);
-      return [{ id, name: text(attachment.name), kind: format[1], type: format[0], relative }];
+      return [{ id, name: text(attachment.name), kind: format[1], trace: attachment.name === "trace" && path.extname(relative).toLowerCase() === ".zip", type: format[0], relative }];
     }));
   }
   testDTO(test) {
@@ -73,11 +73,14 @@ class Repository {
       testTitle: text(test.titles?.join(" › ") || test.title), project: text(test.project), outcome: test.outcome,
       duration: test.duration || 0, line: test.line, displayPath: text(test.listFile || basename(test.file)),
       errors: (test.attempts?.at(-1)?.errors || []).map(error => ({ message: text(error.message || error.value), stack: text(error.stack) })),
+      attempts: (test.attempts || []).map((attempt, index) => ({ index, retry: attempt.retry, status: text(attempt.status), duration: attempt.duration || 0,
+        errors: (attempt.errors || []).map(error => ({ message: text(error.message || error.value), stack: text(error.stack) })) })),
       attachments: this.attachments(test).map(({ relative, ...item }) => item) };
   }
   detail(id) {
     const value = this.raw(id);
-    return { ...this.card(id, value), message: text(value.summary.message), damaged: value.summary.damaged === true,
+    let report = false; try { this.viewer({ kind: 'report', runId: id, artifactId: null }); report = true; } catch {}
+    return { ...this.card(id, value), report, message: text(value.summary.message), damaged: value.summary.damaged === true,
       errors: (value.summary.errors || []).map(error => text(error.stack || error.message)), tests: this.results(value).map(test => this.testDTO(test)) };
   }
   source(id, testId) {
@@ -91,6 +94,10 @@ class Repository {
       return { testId, content, line: target.line, changed, displayPath: path.relative(this.root, filename).split(path.sep).join("/"),
         notice: changed === true ? "فایل فعلی با زمان Run متفاوت است؛ شمارهٔ خط تاریخی است." : changed === null ? "تطابق نسخهٔ کد قابل تأیید نیست." : "نسخهٔ روی دیسک با اثر انگشت Run برابر است." };
     } catch { throw fail(404, "Spec موجود یا مجاز نیست؛ فایل ممکن است حذف، منتقل یا بیش از حد بزرگ شده باشد."); }
+  }
+  viewer(input) {
+    // Native and Service use exactly the same ID/path validation. Never accept a browser path.
+    try { return require('../bridge/artifacts.cjs').resolve(this.root, input); } catch { throw fail(404, 'Report یا Trace ثبت‌شده موجود یا مجاز نیست.'); }
   }
   artifact(id, artifactId) {
     if (!/^[0-9a-f]{24}$/u.test(artifactId)) throw fail(404, "پیوست مجاز نیست.");

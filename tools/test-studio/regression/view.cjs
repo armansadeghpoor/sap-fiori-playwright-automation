@@ -113,7 +113,7 @@ class RegressionView {
       const columnToReuse = groups.some(group => group.viewColumn === this.sourceColumn) ? this.sourceColumn : undefined;
       // The Dashboard is a Sidebar view: the main editor already sits beside it.
       // Reuse one editor group; ViewColumn.Beside on every click would create splits.
-      const editor = await this.vscode.window.showTextDocument(document, { preview: true, preserveFocus: true,
+      const editor = await this.vscode.window.showTextDocument(document, { preview: false, preserveFocus: true,
         viewColumn: visible?.viewColumn ?? columnToReuse ?? this.vscode.ViewColumn.Active, selection: range });
       editor.revealRange(range, this.vscode.TextEditorRevealType.InCenterIfOutsideViewport);
       this.sourceColumn = editor.viewColumn;

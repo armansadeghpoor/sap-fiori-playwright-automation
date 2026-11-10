@@ -52,8 +52,8 @@ exports.run = async () => {
   assert.equal(second.selection.start.line, 2); assert.equal(second.viewColumn, sourceColumn);
   assert.equal(vscode.window.tabGroups.all.length, columnsBefore, "no split-per-click");
   let tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
-  assert.ok(tabs.some(tab => tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === secondFile && tab.isPreview));
-  assert.equal(tabs.some(tab => tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === firstFile), false, "clean preview replaced");
+  assert.ok(tabs.some(tab => tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === secondFile && !tab.isPreview));
+  assert.equal(tabs.some(tab => tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === firstFile), true, "first persistent tab retained");
   const passed = await open("passed same spec"); assert.equal(passed.selection.start.line, 4);
   const skipped = await open("skipped same spec"); assert.equal(skipped.selection.start.line, 5);
   const disk = fs.readFileSync(firstFile);
@@ -72,6 +72,6 @@ exports.run = async () => {
   assert.equal(regression.manager.store().list().length, 1);
   fs.writeFileSync(path.join(root, "vscode-validation.json"), JSON.stringify({ passed: true, checks: [
     "actual Dashboard ready", "real failure source line", "same-Spec exact IDs", "passed and skipped definitions", "second Persian long-path spec",
-    "same editor column", "preview tab reuse", "dirty source and user tabs preserved", "source-change warning", "deleted-file error", "history byte-identical",
+    "same editor column", "persistent tabs and reuse", "dirty source and user tabs preserved", "source-change warning", "deleted-file error", "history byte-identical",
   ] }, null, 2));
 };

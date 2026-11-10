@@ -42,9 +42,16 @@ exports.run = async () => {
     const userDocument = await vscode.workspace.openTextDocument({ content: 'unsaved user work', language: 'typescript' }); await vscode.window.showTextDocument(userDocument, { preview: false });
     const disk = fs.readFileSync(seed.source);
     const failed = await post(selection('A')); assert.equal(failed.status, 200, failed.error); assert.equal(failed.line, 3); assert.equal(vscode.window.activeTextEditor.selection.start.line, 2);
+    assert.equal((await post(selection('D'))).status, 200);
+    assert.equal(vscode.window.activeTextEditor.selection.start.line, 1); assert.equal(vscode.window.activeTextEditor.selection.start.character, 3);
+    const sourceTabs = () => vscode.window.tabGroups.all.flatMap(g => g.tabs).filter(t => t.input instanceof vscode.TabInputText && [seed.source, seed.secondSource].some(file => path.relative(file, t.input.uri.fsPath) === ''));
+    assert.equal(sourceTabs().length, 2, 'opening a second Persian file retains the first'); assert.ok(sourceTabs().every(t => !t.isPreview));
+    assert.equal((await post(selection('A'))).status, 200); assert.equal(sourceTabs().length, 2, 'reopen reuses persistent tab');
+    assert.equal((await app.bridge.guard(catalogTests)).verified, true);
     for (const [id, line] of [['B', 4], ['C', 5]]) { const value = await post(selection(id)); assert.equal(value.line, line); assert.equal(vscode.window.activeTextEditor.selection.start.line, line - 1); }
     const document = vscode.window.activeTextEditor.document;
     const edit = new vscode.WorkspaceEdit(); edit.insert(document.uri, new vscode.Position(0, 0), '// unsaved user edit\n'); await vscode.workspace.applyEdit(edit);
+    await assert.rejects(app.bridge.guard(catalogTests), /ذخیره/);
     assert.equal((await post(selection('A'))).changed, true); assert.equal(document.isDirty, true); assert.deepEqual(fs.readFileSync(seed.source), disk);
     for (let i = 0; i < 3; i++) await post(selection('B'));
     const tabs = vscode.window.tabGroups.all.flatMap(g => g.tabs).filter(t => t.input instanceof vscode.TabInputText && path.relative(t.input.uri.fsPath, seed.source) === ''); assert.equal(tabs.length, 1, 'no duplicate tabs');
@@ -52,6 +59,27 @@ exports.run = async () => {
     const other = await post(selection('B'), secondary.windowId); assert.equal(other.status, 200); assert.equal(other.windowId, secondary.windowId);
     fs.writeFileSync(path.join(control, 'secondary-check'), '1'); await until(() => fs.existsSync(path.join(control, 'secondary-result.json')), 'secondary editor not verified');
     const observed = JSON.parse(fs.readFileSync(path.join(control, 'secondary-result.json'))); assert.equal(path.relative(observed.file, seed.source), ''); assert.equal(observed.line, 3, 'clean secondary sees definition on disk');
+    // The actual VS Code Terminal API, not a terminal adapter mock.
+    const viewer = await app.bridge.artifact({kind:'report',runId:seed.runId,artifactId:null,windowId:bridge.host.windowId}); assert.equal(viewer.opened,true);
+    const terminal = vscode.window.terminals.find(t => t.name === 'Studio HTML Report'); assert.ok(terminal, 'real owned viewer terminal');
+    const options = terminal.creationOptions; assert.ok(options.shellArgs.includes('show-report')); assert.ok(options.shellArgs.includes('--host=127.0.0.1'));
+    assert.ok(!options.cwd.startsWith(root), 'viewer serves isolated copy');
+    try {
+      const pid = await terminal.processId; assert.ok(Number.isSafeInteger(pid) && pid > 0);
+      const { execFileSync } = require('node:child_process');
+      const powershell = path.join(process.env.SystemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe');
+      let port; const deadline = Date.now() + 20000;
+      while (!port && Date.now() < deadline) {
+        // Numeric PID is the terminal we just created; no process enumeration or termination.
+        const output = execFileSync(powershell,['-NoProfile','-NonInteractive','-Command',`Get-NetTCPConnection -State Listen -OwningProcess ${pid} -ErrorAction SilentlyContinue | Select-Object -ExpandProperty LocalPort`],{windowsHide:true,encoding:'utf8',timeout:10000,stdio:['ignore','pipe','pipe']});
+        port = Number(output.trim().split(/\s+/u)[0]); if (!port) await sleep(100);
+      }
+      assert.ok(port > 0 && port < 65536, 'actual owned Report listener');
+      const html = await fetch(`http://127.0.0.1:${port}/`).then(r => r.text()); assert.ok(html.includes('OWNED_NATIVE_REPORT_FIXTURE'));
+    } finally {
+      terminal.dispose(); await until(() => !vscode.window.terminals.includes(terminal), 'owned viewer terminal did not close');
+      await until(() => !fs.existsSync(options.cwd), 'owned viewer copy was not removed');
+    }
     const oldId = bridge.host.windowId; await bridge.refresh(); assert.notEqual(bridge.host.windowId, oldId);
     assert.equal((await post(selection('A'), oldId)).status, 409); assert.equal((await post(selection('A'))).status, 200, 'reconnected window works');
     app.catalog.start({}); await app.catalog.pending;
@@ -64,6 +92,6 @@ exports.run = async () => {
     const before = JSON.parse(fs.readFileSync(path.join(control, 'archive-before.json')));
     for (const [file, base64] of before) assert.equal(fs.readFileSync(path.join(root, file)).toString('base64'), base64);
     assert.equal(app.execution.current, null);
-    fs.writeFileSync(path.join(control, 'driver-result.json'), JSON.stringify({ passed: true, checks: ['two real VS Code windows', 'explicit target and no wrong-window fallback', 'authenticated HTTP → actual editor', 'Persian spec and exact similar-title IDs', 'failed assertion / passed / skipped', 'dirty and unsaved user buffers preserved', 'no duplicate source tabs', 'changed and deleted source', 'catalog stale rejection', 'bridge reconnect', 'History bytes unchanged', 'Execution remains idle'] }, null, 2));
+    fs.writeFileSync(path.join(control, 'driver-result.json'), JSON.stringify({ passed: true, checks: ['two real VS Code windows', 'actual VS Code viewer terminal + owned listener HTTP + copy cleanup', 'explicit target and no wrong-window fallback', 'authenticated HTTP → actual editor', 'Persian spec and exact similar-title IDs', 'failed assertion / passed / skipped', 'dirty and unsaved user buffers preserved', 'two persistent Persian file tabs + exact column + reuse', 'real editor dirty guard, no save', 'no duplicate source tabs', 'changed and deleted source', 'catalog stale rejection', 'bridge reconnect', 'History bytes unchanged', 'Execution remains idle'] }, null, 2));
   } finally { fs.writeFileSync(path.join(control, 'finish'), '1'); await app?.close(); await bridge.close(); }
 };

@@ -34,7 +34,7 @@ function setup(t) {
   return { root, filename, store, vscode, view, opened, shown, messages, spec, archive, open };
 }
 
-test("failed source uses the exact manifest ID, valid error line, safe preview and immutable history", async t => {
+test("failed source uses the exact manifest ID, valid error line, persistent editor and immutable history", async t => {
   const s = setup(t), a = s.spec("A"), b = s.spec("B", { line: 9 });
   const run = s.archive([a, b], [{ ...a, outcome: "failed", attempts: [{ errors: [{ location: { file: s.filename, line: 6, column: 7 } }] }] },
     { ...b, line: 1, outcome: "passed", attempts: [] }]);
@@ -42,7 +42,7 @@ test("failed source uses the exact manifest ID, valid error line, safe preview a
   await s.open(run, "A", { path: "C:\\untrusted.spec.ts", line: 1 });
   assert.deepEqual(s.opened, [s.filename]);
   assert.deepEqual(s.shown[0].options.selection.start, { line: 5, character: 6 });
-  assert.equal(s.shown[0].options.preview, true); assert.equal(s.shown[0].options.preserveFocus, true);
+  assert.equal(s.shown[0].options.preview, false); assert.equal(s.shown[0].options.preserveFocus, true);
   assert.equal(s.shown[0].options.viewColumn, -1);
   await s.open(run, "B");
   assert.equal(s.shown.at(-1).options.selection.start.line, 8, "manifest definition wins over a summary copy");

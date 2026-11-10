@@ -7,6 +7,7 @@
     const active = document.activeElement, activeKey = active?.closest("#explorer-tree li")?.dataset.nodeKey, activeCheckbox = active?.type === "checkbox";
     let restoreFocus;
     const busy = starting || catalog.phase === "discovering" || window.StudioExecution?.busy, stale = selection.stale(catalog), invalid = busy || catalog.phase !== "ready" || stale;
+    $("discovery-stop").hidden = catalog.phase !== "discovering"; $("discovery-stop").disabled = !catalog.discoveryId || Boolean(catalog.cancelRequested);
     $("discover").disabled = busy; $("explorer-all").disabled = invalid || !catalog.tests.length;
     $("explorer-clear").disabled = busy || !selection.ids.size;
     $("explorer-validate").disabled = invalid || !selection.ids.size;
@@ -17,7 +18,7 @@
     $("explorer-revision").textContent = catalog.catalogRevision ? `Catalog #${catalog.catalogRevision.slice(0,8)}` : "Catalog هنوز ساخته نشده";
     $("explorer-revision").title = catalog.catalogRevision || "";
     $("explorer-status").textContent = busy ? "در حال Discovery… این عملیات Config و ماژول‌های تست را بارگذاری می‌کند؛ بدنهٔ تست اجرا نمی‌شود." :
-      catalog.error ? `Discovery ناموفق: ${catalog.error}` : catalog.stale ? catalog.staleReason :
+      catalog.discoveryOutcome === "cancelled" ? "Discovery لغو شد؛ Catalog و انتخاب قبلی حفظ شدند." : catalog.error ? `Discovery ناموفق: ${catalog.error}` : catalog.stale ? catalog.staleReason :
       stale ? "Catalog عوض شده است. انتخاب قبلی را پاک کنید و دوباره انتخاب کنید." : catalog.phase === "idle" ? "برای دریافت ساختار واقعی، روی «شناسایی / Refresh» بزنید. History منبع Explorer نیست." :
       !catalog.testCount ? "Discovery موفق بود؛ تستی پیدا نشد." : "Catalog آماده است؛ اجرا نیازمند بازبینی و تأیید است.";
     $("explorer-status").className = catalog.error || stale ? "notice error" : "notice";
@@ -83,6 +84,10 @@
     try { await mutation("/api/discovery", {}); await refresh(); }
     catch (error) { epoch++; catalog = previous; $("explorer-validation").textContent = error.message; void refresh(); }
     finally { starting = false; render(); }
+  };
+  $("discovery-stop").onclick = async () => {
+    try { await mutation('/api/discovery/stop', { discoveryId: catalog.discoveryId }); await refresh(); }
+    catch (error) { $("explorer-validation").textContent = error.message; }
   };
   $("run-selected").onclick = () => window.StudioExecution.start({scope:'selection',...selection.payload(catalog)});
   $("run-suite").onclick = () => window.StudioExecution.start({scope:'suite',catalogRevision:catalog.catalogRevision,ids:catalog.tests.map(t=>t.id)});

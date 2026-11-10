@@ -16,8 +16,8 @@ async function createService({ root, sessionLifetime = 8 * 60 * 60 * 1000, trash
   const repository = new Repository(root), sessions = new Map(), pairingCode = crypto.randomBytes(32).toString("hex");
   const trash = new Trash(repository, trashOptions);
   const catalog = new Catalog(repository.root, catalogOptions);
-  const execution = new Execution(repository, catalog, executionOptions);
   const bridge = new Bridge(repository, catalog, bridgeOptions);
+  const execution = new Execution(repository, catalog, { ...executionOptions, editorGuard: tests => bridge.guard(tests), secrets: () => [pairingCode, ...[...sessions].flatMap(([token, value]) => [token, value.csrf]), ...bootstrap.tokens.keys()] });
   const bootstrap = new Bootstrap(instanceId, privateDirectory, bootstrapTTL);
   const events = new Events(instanceId, execution);
   const cookieName = "studio_" + crypto.randomBytes(8).toString("hex");
@@ -76,9 +76,9 @@ async function createService({ root, sessionLifetime = 8 * 60 * 60 * 1000, trash
       if (!route.startsWith("/api/")) throw fail(404, "مسیر موجود نیست.");
       const currentSession = session(request);
       if (request.method === 'GET' && route === '/api/bridge') { json(response, 200, await bridge.status()); return; }
-      if (request.method === 'POST' && route === '/api/bridge/open') {
+      if (request.method === 'POST' && ['/api/bridge/open', '/api/bridge/artifact'].includes(route)) {
         if (request.headers.origin !== origin || !equal(request.headers['x-studio-csrf'], currentSession.csrf)) throw fail(403, 'Origin / CSRF required.');
-        json(response, 200, await bridge.open(await body(request, 8192))); return;
+        json(response, 200, await (route.endsWith('/artifact') ? bridge.artifact(await body(request, 8192)) : bridge.open(await body(request, 8192)))); return;
       }
       if(request.method==='GET' && route==='/api/events'){events.subscribe(request,response,currentSession);return;}
       if(request.method==='POST' && route==='/api/service/stop'){
@@ -95,10 +95,10 @@ async function createService({ root, sessionLifetime = 8 * 60 * 60 * 1000, trash
         const result = route.endsWith("/start") ? execution.start(currentSession, input) : route.endsWith("/confirm") ? execution.confirm(currentSession, input) : execution.stop(input);
         json(response, route.endsWith("/start") ? 202 : 200, result); return;
       }
-      if (request.method === "POST" && ["/api/discovery", "/api/selection/resolve"].includes(route)) {
+      if (request.method === "POST" && ["/api/discovery", "/api/discovery/stop", "/api/selection/resolve"].includes(route)) {
         if (request.headers.origin !== origin || !equal(request.headers["x-studio-csrf"], currentSession.csrf)) throw fail(403, "تأیید Origin و CSRF مخصوص این Session لازم است.");
         const input = await body(request, route === "/api/selection/resolve" ? 2 * 1024 * 1024 : 32768);
-        json(response, route === "/api/discovery" ? 202 : 200, route === "/api/discovery" ? catalog.start(input) : catalog.resolve(input)); return;
+        json(response, route === "/api/discovery" ? 202 : 200, route === "/api/discovery" ? catalog.start(input) : route === "/api/discovery/stop" ? catalog.cancel(input) : catalog.resolve(input)); return;
       }
       if (request.method === "POST" && ["/api/history/plan", "/api/history/restore-plan", "/api/history/confirm"].includes(route)) {
         if (request.headers.origin !== origin || !equal(request.headers["x-studio-csrf"], currentSession.csrf)) throw fail(403, "تأیید Origin و CSRF مخصوص این Session لازم است.");
@@ -132,7 +132,7 @@ async function createService({ root, sessionLifetime = 8 * 60 * 60 * 1000, trash
         const stream = fs.createReadStream(artifact.filename, { start, end });
         stream.on("error", () => response.destroy()); response.on("close", () => stream.destroy()); stream.pipe(response); return;
       }
-      throw fail(404, "منبع مجاز پیدا نشد؛ Report اجرایی و Endpoint اجرایی در این نسخه وجود ندارند.");
+      throw fail(404, "منبع مجاز پیدا نشد.");
     } catch (error) {
       if (response.headersSent) response.destroy();
       else json(response, error.status || 500, { error: error.status ? error.message : "خواندن داده ممکن نشد؛ آرشیو یا مجوز فایل را بررسی کنید." });

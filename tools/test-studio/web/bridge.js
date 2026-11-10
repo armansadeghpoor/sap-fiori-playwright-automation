@@ -33,6 +33,14 @@
     } catch (e) { $('bridge-result').textContent = e.message + ' Source Preview داخل Dashboard قابل استفاده است.'; void refresh(); }
     finally { busy = false; $('bridge-window').disabled = !status.windows.length; }
   }
-  window.StudioBridge = { open, async connect(read, mutate) { const first = !api; api = read; write = mutate; if (first) await refresh(); } };
+  async function artifact(kind, runId, artifactId = null) {
+    if (!write || busy) return; busy = true;
+    try {
+      const result = await write('/api/bridge/artifact', { windowId: chosen || null, kind, runId, artifactId });
+      $('viewer-result').textContent = result.message;
+    } catch (error) { $('viewer-result').textContent = error.message; }
+    finally { busy = false; }
+  }
+  window.StudioBridge = { open, artifact, async connect(read, mutate) { const first = !api; api = read; write = mutate; if (first) await refresh(); } };
   setInterval(() => void refresh(), 5000);
 })();

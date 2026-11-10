@@ -27,6 +27,12 @@ const { chromium } = require(path.join(repository, "node_modules", "playwright")
       return route.fulfill({ body, contentType: name.endsWith("css") ? "text/css" : name.endsWith("js") ? "application/javascript" : "text/html" });
     });
     await page.goto("https://studio.test/");
+    const manifest = JSON.parse(fs.readFileSync(path.join(media, '..', 'package.json'), 'utf8'));
+    assert.equal(manifest.contributes.views.playwrightTestStudio.find(v => v.id === 'playwrightTestStudio.form').name, "\u0633\u0627\u062e\u062a \u062a\u0633\u062a \u062c\u062f\u06cc\u062f");
+    assert.equal(await page.locator('h1').textContent(), "\u0627\u0632 \u0627\u06cc\u062f\u0647 \u062a\u0627 \u0636\u0628\u0637 \u062a\u0633\u062a");
+    assert.equal(await page.locator('header .eyebrow').textContent(), 'PLAYWRIGHT TEST STUDIO');
+    assert.equal(await page.evaluate(() => document.characterSet), 'UTF-8');
+
     const send = data => page.evaluate(value => window.postMessage(value, "*"), data);
     await send({ type: "init", root: "D:\\NewWeb UiTest", userProfiles: ["rahbar", "user1", "user2", "kartable"], deviceProfiles: ["desktop", "pixel-7", "iphone-15-pro-max"] });
     await page.locator("#name").fill("بررسی مقدار پیش‌فرض");

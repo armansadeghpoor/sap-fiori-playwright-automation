@@ -18,7 +18,7 @@ class BridgeController {
         if (this.closed) { await host.close(); return; }
         this.host = host;
         this.status.text = '$(plug) Studio Bridge #' + host.windowId.slice(0, 6);
-        this.status.tooltip = path.basename(root) + '\nWindow: ' + host.windowId + '\nDashboard → VS Code (read source only)';
+        this.status.tooltip = path.basename(root) + '\nWindow: ' + host.windowId + '\nDashboard → VS Code (source, editor safety, report/trace)';
       } catch {
         await host?.close(); this.status.text = '$(debug-disconnect) Studio Bridge unavailable';
         this.status.tooltip = 'Open one trusted compatible project in this window, then use Studio Bridge: Reconnect.';

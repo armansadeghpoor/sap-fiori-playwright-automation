@@ -7,7 +7,15 @@ const {createService} = require('../service/server.cjs');
 const {explorerFixture,cleanup,fingerprint} = require('./explorer-fixture.cjs');
 (async()=>{
  const before=process.argv.includes('--before'), output=process.env.STUDIO_VISUAL_OUTPUT||fs.mkdtempSync(path.join(os.tmpdir(),'studio-visual-'));
- fs.mkdirSync(output,{recursive:true});const f=explorerFixture(),app=await createService({root:f.root});let browser;
+ fs.mkdirSync(output,{recursive:true});const f=explorerFixture();
+ const diagnostic="Error: expect(locator).toBeVisible()\nLocator: getByRole(\"button\", { name: \"ثبت درخواست\" }).locator('[data-id=\"a:b\"]')\nExpected: <visible> [true] != false; C:\\fixture\\sample.spec.ts:3:1";
+ if(!before){
+  const manifest={...f.incomplete.manifest,tests:Array.from({length:41},(_,i)=>({...f.incomplete.manifest.tests[0],id:'I'+i,title:'planned '+i}))};
+  fs.writeFileSync(path.join(f.incomplete.folder,'manifest.json'),JSON.stringify(manifest));
+  const events=Array.from({length:19},(_,i)=>({type:'testEnd',testId:'I'+i,expectedStatus:'passed',result:{status:i<9?'passed':'failed',duration:20,errors:i<9?[]:[{message:diagnostic,stack:diagnostic+'\n at '+f.source+':3:1'}],attachments:[]}}));
+  events.push({type:'testBegin',testId:'I19'});fs.writeFileSync(path.join(f.incomplete.folder,'events.ndjson'),events.map(v=>JSON.stringify(v)).join('\n')+'\n');
+ }
+ const app=await createService({root:f.root});let browser;
  try {
   const original=fingerprint(f.history.base);browser=await chromium.launch({channel:'chrome',headless:true});
   const page=await browser.newPage({viewport:{width:1600,height:1000}}),faults=[];page.on('pageerror',e=>faults.push(e.message));
@@ -37,8 +45,28 @@ const {explorerFixture,cleanup,fingerprint} = require('./explorer-fixture.cjs');
    assert.equal(await page.locator('#inspector-expand').evaluate(e=>document.activeElement===e),true);
    await page.locator('a[href="#execution-panel"]').click();assert.equal(await page.locator('#execution-panel').evaluate(e=>document.activeElement===e),true);
   }
+  if(!before){
+   await page.setViewportSize({width:1600,height:1000});
+   const idleHeight=(await page.locator('#execution-panel').boundingBox()).height;
+   assert.ok(idleHeight<210,'compact Idle panel');assert.ok((await page.locator('#bridge-panel').boundingBox()).height<95,'compact Bridge panel');
+   await page.locator('#execution-error').evaluate(e=>e.textContent='Fixture transport error: [a:b] <failed>');
+   assert.equal(await page.locator('#execution-error').isVisible(),true);
+   assert.notEqual(await page.locator('#execution-panel').evaluate(e=>getComputedStyle(e).display),'grid','Idle transport errors retain full layout');
+   await page.locator('#execution-error').evaluate(e=>e.textContent='');
+   await page.locator(`[data-run-id="${f.incomplete.manifest.id}"]`).click();
+   await page.waitForFunction(()=>document.querySelector('#metrics b')?.textContent==='41');
+   assert.deepEqual(await page.locator('#metrics b').allTextContents(),['41','9','10','0']);
+   assert.match(await page.locator('#metrics').innerText(),/Planned Tests/);assert.match(await page.locator('#summary-note').innerText(),/notRun.*21/);assert.match(await page.locator('#summary-note').innerText(),/unfinished.*1/);
+   assert.match(await page.locator('#summary-note').innerText(),/نهایی نشده/);
+   await page.locator('[data-test-id="I9"]').click();await page.locator('#code-preview .line').first().waitFor();
+   assert.equal(await page.locator('#failure-message').textContent(),diagnostic);assert.equal(await page.locator('#stack').textContent(),diagnostic+'\n at '+f.source+':3:1');
+   const copied=await page.locator('#failure-message').evaluate(e=>{const r=document.createRange();r.selectNodeContents(e);const s=getSelection();s.removeAllRanges();s.addRange(r);const text=s.toString();s.removeAllRanges();return text;});assert.equal(copied,diagnostic);
+   for(const id of ['failure-message','stack','code-preview','test-meta','run-id','source-path'])assert.equal(await page.locator('#'+id).evaluate(e=>getComputedStyle(e).direction),'ltr',id);
+   assert.equal(await page.locator('#summary-note').evaluate(e=>getComputedStyle(e).direction),'rtl');
+   await page.locator('#stack-section').evaluate(e=>e.open=true);
+  }
   if(!before)await page.locator('a[href="#overview"]').filter({hasText:'Overview'}).click();
-  const captures=[], contrasts=[];
+  const captures=[], contrasts=[], panelSizes=[];
   for(const theme of ['dark','light']){
    if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme').click();
    if(!before){
@@ -55,6 +83,7 @@ const {explorerFixture,cleanup,fingerprint} = require('./explorer-fixture.cjs');
      for(const b of boxes)assert.ok(b.rect.x>=-1&&b.rect.right<=width+1,`${b.id} outside viewport ${width}`);
      if(width>=1440){const a=await page.locator('.explorer').boundingBox(),b=await page.locator('.inspector').boundingBox();assert.ok(b.width>350);assert.ok(Math.abs(a.y-b.y)<2);}
     }
+    if(width===1600)panelSizes.push({theme,executionHeight:(await page.locator('#execution-panel').boundingBox()).height,bridgeHeight:(await page.locator('#bridge-panel').boundingBox()).height});
     const name=`${before?'before':'after'}-${theme}-${width}.png`;await page.screenshot({path:path.join(output,name),fullPage:true});captures.push(name);if(width===1600||width===390)await page.screenshot({path:path.join(output,(before?'before':'after')+'-'+theme+'-'+width+'-viewport.png'),fullPage:false});
    }
   }
@@ -65,6 +94,11 @@ const {explorerFixture,cleanup,fingerprint} = require('./explorer-fixture.cjs');
    await page.locator('#theme').focus();await page.keyboard.press('Tab');await page.keyboard.press('Shift+Tab');assert.notEqual(await page.locator('#theme').evaluate(e=>getComputedStyle(e).outlineStyle),'none');
   }
   if(!before){
+   await page.locator('#run-selected').click();await page.locator('#execution-confirm').waitFor({state:'visible'});
+   assert.equal(await page.locator('#execution-panel').getAttribute('data-compact'),'false');
+   assert.equal(await page.locator('#execution-stop').isVisible(),true);
+   page.once('dialog',d=>d.dismiss());await page.locator('#execution-confirm').click();
+   await page.waitForFunction(()=>document.getElementById('execution-confirm').hidden);
    await page.locator('#inspector-expand').click();await page.context().clearCookies();
    await page.locator('#login').waitFor({state:'visible',timeout:12000});
    assert.equal(await page.locator('#overview').isVisible(),false,'summary hidden after session ends');
@@ -72,6 +106,6 @@ const {explorerFixture,cleanup,fingerprint} = require('./explorer-fixture.cjs');
    assert.equal(await page.locator('#dashboard').isVisible(),false);
   }
   assert.deepEqual(fingerprint(f.history.base),original);assert.equal(fs.existsSync(path.join(f.root,'BODY_MUST_NOT_RUN')),false);assert.deepEqual(faults,[]);
-  console.log(JSON.stringify({passed:true,before,output,captures,contrasts,checks:before?['baseline assets rendered','fixture-only discovery','history unchanged','no test bodies executed']:['fixture-only discovery','selected-run summary separate from catalog','responsive themes','same-node drawer preserves selection/source/focus','keyboard navigation','reduced motion','unique DOM IDs','history unchanged','no test bodies executed','text contrast >=4.5 in both themes','expired-session presentation closes drawer and summary']}));
+  console.log(JSON.stringify({passed:true,before,output,captures,contrasts,panelSizes,checks:before?['baseline assets rendered','fixture-only discovery','history unchanged','no test bodies executed']:['fixture-only discovery','selected-run summary separate from catalog','responsive themes','same-node drawer preserves selection/source/focus','keyboard navigation','reduced motion','unique DOM IDs','history unchanged','no test bodies executed','text contrast >=4.5 in both themes','expired-session presentation closes drawer and summary']}));
  }finally{if(browser)await browser.close();await app.close();cleanup(f.root);}
 })().catch(e=>{console.error(e);process.exitCode=1;});
