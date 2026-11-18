@@ -19,13 +19,14 @@ test('test', async ({ page, request }) => {
   await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.getByText('تست مخصوص وب جدید', { exact: true }).click();
   await page.getByRole('link', { name: 'ذخیره در عکس تکی لیستی' }).click();
-  await page.getByRole('button', { name: 'جدید' }).last().click();
-  await page.getByRole('button', { name: 'جدید' }).last().click();
+  await page.getByRole('button', { name: 'جدید', exact: true }).click();
+  await page.waitForTimeout(700);
+  await page.getByRole('button', { name: 'جدید', exact: true }).click();
   const titleColumns = page.locator('bsu-barsa-table-column')
     .filter({ has: page.locator('[caption="عنوان"]') });
   await titleColumns.nth(0).locator('input[type="text"]').fill('تست1');
   await titleColumns.nth(0).locator('input[type="text"]').press('Tab');
-  await page.getByRole('cell').nth(2).press('Tab');
+  await page.getByRole('gridcell').nth(2).press('Tab');
   await page.locator('#LayoutItem_16').getByRole('textbox').fill('12');
   await page.getByRole('button', { name: 'ذخیره و بستن' }).click();
   await expect(page.getByText('اشکال در مقادیر فرم عکس تکی لیستی: ردیف 1 تغییر یافته و ذخیره نشده است')).toBeVisible();

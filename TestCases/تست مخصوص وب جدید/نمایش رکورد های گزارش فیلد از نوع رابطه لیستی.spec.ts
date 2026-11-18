@@ -11,7 +11,7 @@ test("test", async ({ page, request }) => {
   await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.getByText("تست مخصوص وب جدید", { exact: true }).click();
   await page.getByRole('link', { name: 'نمایش رکورد های گزارش فیلد از نوع رابطه لیستی' }).click();
-  await page.getByRole("button", { name: "جدید" }).click();
+  await page.getByRole('button', { name: 'جدید', exact: true }).click();
   await page.getByRole('button', { name: 'اضافه به لیست' }).click();
   await page.locator('.tw-flex > .ng-untouched > .fd-checkbox__label > .fd-checkbox__checkmark').first().click();
   await page.getByRole("button", { name: "تایید" }).click();

@@ -19,7 +19,8 @@ test('test', async ({ page, request }) => {
   await page.locator('a').filter({ hasText: 'نویگیتور' }).click();
   await page.getByRole('link', { name: 'کارتابل وارده تفکیکی' }).click();
   await page.getByText('تمامی سمتهای من').click();
-  await page.locator('button:has(.sap-icon--overflow)').first().click();
+  // await page.locator('button:has(.sap-icon--overflow)').first().click();
+  await page.locator('bsu-list-item fd-popover-control').getByRole('button').first().click();
   await page.getByRole('button', { name: 'حذف پیام' }).click();
   await page.getByRole('button', { name: 'بله' }).click();
   await expect(page.locator('bsu-ui-list-view li')).toHaveCount(2);

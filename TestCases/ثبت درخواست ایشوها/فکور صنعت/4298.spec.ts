@@ -32,19 +32,15 @@ test("4298", async ({ page }) => {
     name: "کارتابل وارده تفکیکی",
   }).click();
 
-  const targetLink = page.getByRole("link", {
-    name: "تمامی سمتهای من",
-    exact: true,
+  const targetLink = page.locator("a").filter({
+    hasText: /تمامی\s*سمت[\s\u200c]*های\s*من/,
   });
 
-  await expect(targetLink).toHaveCount(1);
+  await expect(targetLink).toHaveCount(1, {
+    timeout: 15000,
+  });
+
   await expect(targetLink).toBeVisible();
-
-  const tagName = await targetLink.evaluate(
-    (element) => element.tagName.toLowerCase()
-  );
-
-  expect(tagName).toBe("a");
 
   const href = await targetLink.getAttribute("href");
 

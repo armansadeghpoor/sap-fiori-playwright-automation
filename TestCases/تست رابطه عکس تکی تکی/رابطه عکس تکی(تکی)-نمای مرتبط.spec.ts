@@ -18,13 +18,13 @@ test("test", async ({ page, request }) => {
   await page.getByRole("button", { name: "جدید" }).click();
   await page.locator("bsu-ui-text-field").getByRole("textbox").click();
   await page.locator("bsu-ui-text-field").getByRole("textbox").fill("555");
-  await page.getByRole("button", { name: "Select Options" }).click();
+  await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
   await page.getByText("هومن").click();
-  await page.getByRole("button", { name: "" }).click();
+  await page.getByRole('button', { name: 'ویرایش' }).click();
   await page.getByRole("textbox", { name: "هومن" }).click();
   await page.getByRole("textbox", { name: "هومن" }).fill("هومن محمدی");
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
-  await page.getByRole("button", { name: "Select Options" }).click();
+  await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
   await page.getByText("هومن محمدی").click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await expect(page.locator("tbody")).toContainText("‫هومن محمدی‬");

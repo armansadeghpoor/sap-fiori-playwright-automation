@@ -19,23 +19,27 @@ test('test', async ({ page }) => {
   await page.getByRole('link', { name: 'قابلیت ویرایش در لیست' }).click();
   await page.locator('a').filter({ hasText: '‫‪15‬' }).click();
   await page.waitForTimeout(500);
-  await page.getByRole('cell', { name: '15' }).getByRole('textbox').press('ArrowDown');
+  // await page.getByRole('cell', { name: '15' }).getByRole('textbox').press('ArrowDown');
+
+  await page.getByRole('gridcell', { name: '15' }).getByRole('textbox').press('ArrowDown');
+
+
   await page.waitForTimeout(500);
-  await expect(page.getByRole('cell', { name: '20' }).getByRole('textbox')).toBeVisible();
+  await expect(page.getByRole('gridcell', { name: '20' }).getByRole('textbox')).toBeVisible();
   await page.waitForTimeout(500);
-  await page.getByRole('cell', { name: '20' }).getByRole('textbox').click();
+  await page.getByRole('gridcell', { name: '20' }).getByRole('textbox').click();
   await page.waitForTimeout(500);
-  await page.getByRole('cell', { name: '20' }).getByRole('textbox').press('ArrowDown');
+  await page.getByRole('gridcell', { name: '20' }).getByRole('textbox').press('ArrowDown');
   await page.waitForTimeout(500);
-  await page.getByRole('cell', { name: '25' }).getByRole('textbox').press('ArrowUp');
+  await page.getByRole('gridcell', { name: '25' }).getByRole('textbox').press('ArrowUp');
   await page.waitForTimeout(500);
-  await page.getByRole('cell', { name: '20' }).getByRole('textbox').press('ArrowUp');
+  await page.getByRole('gridcell', { name: '20' }).getByRole('textbox').press('ArrowUp');
   await page.waitForTimeout(500);
-  await page.getByRole('cell', { name: '15' }).getByRole('textbox').press('Tab');
+  await page.getByRole('gridcell', { name: '15' }).getByRole('textbox').press('Tab');
   await page.waitForTimeout(500);
   await page.getByRole('textbox', { name: 'علی' }).click();
   await page.waitForTimeout(500);
   await page.getByRole('textbox', { name: 'علی' }).press('Tab');
   await page.waitForTimeout(500);
-  await page.getByRole('cell', { name: '15' }).press('Shift+Tab');
+  await page.getByRole('gridcell', { name: '15' }).press('Shift+Tab');
 });

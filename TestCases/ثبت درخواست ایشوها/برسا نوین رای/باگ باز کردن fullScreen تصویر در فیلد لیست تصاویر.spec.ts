@@ -15,7 +15,7 @@ test("test", async ({ page }) => {
   await page.getByRole("link", { name: "باگ باز کردن fullScreen" }).last().click();
   await page.waitForTimeout(7000);
   await page.getByText("‫*حذف نشود*‬").dblclick();
-  await page.locator('button', { has: page.locator('.sap-icon--overflow') }).first().click();
+  await page.locator('fd-card-footer').getByRole('button').first().click();
   await page.locator('a').filter({ hasText: 'تمام صفحه همه' }).click();
   await page.getByRole("button", { name: "close", exact: true }).click();
   await page.locator('button:has(.sap-icon--overflow)').nth(1).click();

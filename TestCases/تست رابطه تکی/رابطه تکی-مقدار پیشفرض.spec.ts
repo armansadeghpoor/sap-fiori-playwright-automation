@@ -14,9 +14,7 @@ test("test", async ({ page, request }) => {
     .getByText("دانشجو-رابطه تکی-فیلد محاسباتی و مقدار پیش فرض")
     .click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await expect(page.getByRole("combobox", { name: "انتخاب کنید" })).toHaveValue(
-    "جغرافیا"
-  );
+await expect(page.getByRole('combobox')).toHaveValue('جغرافیا');
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await expect(page.locator("bsu-barsa-table-row")).toContainText("‫جغرافیا‬");
 });

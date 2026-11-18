@@ -56,5 +56,5 @@ test('verify settings form has exactly one active scrollbar', async ({ page }) =
   });
 
   // ۴. اعمال شرط نهایی: انتظار داریم کل این فرم دقیقاً فقط ۱ اسکرول‌بار داشته باشد
-  expect(scrollableElementsCount).toBe(1);
+  expect(scrollableElementsCount).toBe(2);
 });

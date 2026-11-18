@@ -9,6 +9,7 @@ test("test", async ({ page, request }) => {
   await page.getByRole("button", { name: "Navigation" }).click();
   await page.getByText("تست وب جدید").click();
   await page.getByText("امضا در وب جدید").click();
+  await page.waitForTimeout(300);
   await page.getByRole("button", { name: "جدید" }).click();
   await page
     .getByRole("article")

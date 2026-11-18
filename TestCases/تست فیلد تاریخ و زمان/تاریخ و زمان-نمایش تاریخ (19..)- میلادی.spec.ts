@@ -10,7 +10,7 @@ test("test", async ({ page }) => {
   await page.getByText("فیلد تاریخ و زمان").click();
   await page.getByText("فیلد تاریخ-نمایش مختلف").click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.locator("#fd-input-group-button-id-1").click();
+  await page.locator('fd-input-group span').getByRole('button').nth(1).click();
   await page.getByRole("button", { name: "امروز" }).click();
   await page.getByRole("button", { name: "تایید" }).click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();

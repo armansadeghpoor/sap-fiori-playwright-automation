@@ -14,5 +14,5 @@ test("test", async ({ page }) => {
   await page.getByText('ثبت درخواست ایشوها').last().click();
   await page.getByRole('link', { name: '4124' }).last().click();
   await page.getByRole('link', { name: '‫*حذف نشود*‬' }).dblclick();
-  await expect(page.getByText('دانلود صفحهٔ فعال بزرگ‌نمایی صفحهٔ فعال کوچک‌نمایی صفحهٔ فعال تمام صفحه چاپ دریا')).toBeVisible();
+  await expect(page.locator('bsu-ui-pictures-info fd-toolbar')).toContainText('دانلود صفحهٔ فعال دانلود همه بزرگ‌نمایی صفحهٔ فعال کوچک‌نمایی صفحهٔ فعال تمام صفحه چاپ دریافت فایل');
 });

@@ -17,7 +17,7 @@ test('test', async ({ page }) => {
   await page.getByRole('link', { name: 'کارتابل وارده تفکیکی' }).click();
   await expect(page.getByText('تمامی سمتهای من (12)')).toBeVisible();
   await expect(page.getByText('منشی ایشو 4070 (کارتابل) (1)')).toBeVisible();
-  const targetItem = page.locator('#fd-list-item-39 > div:nth-child(2) > div > .fd-list__title > .ellapsis');
+  const targetItem = page.locator('text=منشی ایشو 4070 (کارتابل) (1)');
   await targetItem.scrollIntoViewIfNeeded();
   await expect(targetItem).toBeVisible();
 });

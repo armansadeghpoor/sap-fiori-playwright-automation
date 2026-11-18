@@ -14,7 +14,7 @@ test("test", async ({ page }) => {
   await page.getByText("ثبت درخواست ایشوها").last().click();
   await page.getByRole("link", { name: "CB18809" }).last().click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.getByRole('combobox', { name: 'انتخاب کنید' }).click();
+  await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
   await page.locator('button[glyph="search"]').click();
   await page.waitForTimeout(500);
   await page.getByRole('button', { name: 'جستجو', exact: true }).last().click();

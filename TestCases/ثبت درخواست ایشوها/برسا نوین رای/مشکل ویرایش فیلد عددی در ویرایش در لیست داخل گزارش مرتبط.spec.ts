@@ -22,7 +22,7 @@ test("test", async ({ page, request }) => {
   await page.getByText("‫‪155‬").click();
   await page.locator('bsu-ui-num-int-ui').getByRole('textbox').click();
   await page.locator('bsu-ui-num-int-ui').getByRole('textbox').fill("");
-  await page.getByRole("cell").nth(2).click();
+  await page.getByRole("gridcell").nth(2).click();
   await page.locator("#LayoutItem_5").getByRole("textbox").click();
   await page.locator("#LayoutItem_5").getByRole("textbox").fill("155.355");
   await page.getByTitle("ویرایش در لیست", { exact: true }).click();

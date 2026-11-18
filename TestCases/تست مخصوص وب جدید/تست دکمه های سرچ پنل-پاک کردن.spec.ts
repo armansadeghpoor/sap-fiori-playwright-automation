@@ -12,7 +12,7 @@ test("test", async ({ page }) => {
   await expect(page.getByLabel('Select an Option')).toContainText('مرد');
   await page.getByRole("button", { name: "جستجو" }).click();
   await page.getByRole("button", { name: "پاک کردن" }).click();
-  await expect(page.getByLabel('Select an Option')).toContainText('انتخاب کنید');//چک کنیم که خالی شده باشه
+  await expect(page.getByRole('combobox', { name: 'Select an Option' })).toContainText('');
   await page.getByRole("textbox").click();
   await page.getByRole("textbox").fill("32");
   await page.getByRole("button", { name: "جستجو" }).click();

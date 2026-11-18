@@ -12,7 +12,7 @@ test("test", async ({ page, request }) => {
   await page.getByText("رابطه تکی").click();
   await page.getByText("رابطه تکی-نمایش فرم مرتبط").click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.locator("#fd-input-group-button-id-0").click();
+  await page.locator('fd-input-group span').getByRole('button').first().click();
   await page.locator("li").getByText("سفید تست").click();
   await page.getByRole('button', { name: 'ویرایش', exact: true }).click();
   await page.getByRole("textbox", { name: "سفید" }).click();

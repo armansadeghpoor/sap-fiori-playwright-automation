@@ -42,7 +42,8 @@ test("test", async ({ page, request }) => {
     .filter({ hasText: "نام خانوادگی:" })
     .getByRole("textbox")
     .fill("بهرامیان");
-  await page.getByRole("button", { name: "" }).click();
+  await page.getByRole('combobox').click();
+  await page.getByRole('button', { name: 'جدید' }).click();
   await page.locator("label").filter({ hasText: "کارشناسی" }).first().click();
   await page.getByRole("button", { name: "select day" }).click();
   await page.waitForTimeout(1000);
@@ -59,7 +60,7 @@ test("test", async ({ page, request }) => {
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await page.waitForTimeout(1000);
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
-  await page.getByRole("button", { name: "Navigation" }).click();
+  await page.getByRole("button", { name: "Navigation" }).last().click();
   await page
     .getByText("رابطه عکس تکی(تکی)-مدرک تحصیلی مرتبط با دانشجو")
     .click();

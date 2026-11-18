@@ -10,7 +10,7 @@ test("test", async ({ page }) => {
   await page.getByText("رابطه تکی").click();
   await page.getByText("تست فیلد رابطه تکی-انواع نمایش").click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.locator("#fd-input-group-button-id-0").click();
+  await page.locator('fd-input-group span').getByRole('button').first().click();
   await page.locator("li").getByText("سفید تست").click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
 });

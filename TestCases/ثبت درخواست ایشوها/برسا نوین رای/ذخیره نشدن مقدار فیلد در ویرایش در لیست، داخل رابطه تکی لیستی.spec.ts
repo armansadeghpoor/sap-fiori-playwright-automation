@@ -23,7 +23,7 @@ test("test", async ({ page, request }) => {
   await page.locator('button', { has: page.locator('.sap-icon--navigation-left-arrow') }).click();//باز کردن رکورد حذف نشود با استفاده از دکمه
   await expect(page.locator('bsu-barsa-table-row')).toContainText('‫‪10‬');
   await page.locator('a').filter({ hasText: '‫‪10‬' }).click();
-  await page.getByRole('cell', { name: '10' }).getByRole('textbox').fill('');
+  await page.getByRole('gridcell', { name: '10' }).getByRole('textbox').fill('');
   await page.getByTitle('ویرایش در لیست', { exact: true }).click();
   await expect(page.locator('bsu-barsa-table-row')).toContainText('‫‬');
 });

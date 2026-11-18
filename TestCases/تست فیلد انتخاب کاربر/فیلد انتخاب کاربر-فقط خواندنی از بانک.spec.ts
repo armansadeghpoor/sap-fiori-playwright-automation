@@ -18,7 +18,7 @@ test("test", async ({ page, request }) => {
     .click();
   await page.getByText("انتخاب کاربر-انواع مشخصات").click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.locator("#fd-input-group-button-id-1").click();
+  await page.locator('fd-input-group').getByRole('button').nth(1).click();
   await page.locator("div.fd-scrollbar ul li").getByText("کاربر1").click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
 });

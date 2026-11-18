@@ -13,11 +13,9 @@ test("test", async ({ page }) => {
       "رابطه عکس تکی(تکی)-خوابگاه-نمایش لیست ساده-فرم مرتبط غیرقابل ویرایش-نمایش آیکون "
     )
     .click();
-  await page
-    .getByRole("row", { name: "‫شاهد‬ ‫نیمه خصوصی‬ ‫1‬ " })
-    .getByRole("button")
-    .click();
-  await page.getByRole("button", { name: "" }).click();
+  await page.getByRole('link', { name: '‫شاهد‬' }).dblclick();
+  await page.getByRole('combobox').filter({ hasText: /^$/ }).click();
+  await page.getByRole('button', { name: 'ویرایش' }).click();
   await expect(page.locator("fd-dynamic-page-content")).toContainText("نام:1");
   await page.getByTitle('Close').click();
 });

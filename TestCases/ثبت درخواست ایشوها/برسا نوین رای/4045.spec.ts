@@ -18,5 +18,5 @@ test('test', async ({ page }) => {
   await page.getByRole('textbox', { name: 'xxxxxxx' }).press('Enter');
   await page.locator('.fd-avatar__icon').click();
   await page.getByRole('menuitem', { name: 'درباره برنامه' }).click();
-  await expect(page.getByRole('cell', { name: '‫2.3.163‬' }).locator('a')).toBeVisible();
+  await expect(page.locator('a').filter({ hasText: '‫2.3.163‬' })).toBeVisible();
 });

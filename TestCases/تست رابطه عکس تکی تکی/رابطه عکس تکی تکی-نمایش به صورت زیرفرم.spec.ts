@@ -16,10 +16,7 @@ test("test", async ({ page, request }) => {
     )
     .click();
   await expect(page.getByText("‫1‬")).toBeVisible();
-  await page
-    .getByRole("row", { name: "‫بدنسازی‬ ‫انفرادی‬ ‫1‬ " })
-    .getByRole("button")
-    .click();
+  await page.getByRole('link', { name: '‫بدنسازی‬' }).dblclick();
   await page.getByRole("textbox", { name: "1" }).click();
   await page.getByRole("textbox", { name: "1" }).fill("55");
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
@@ -35,7 +32,7 @@ test("test", async ({ page, request }) => {
     .filter({ hasText: "عنوان:" })
     .getByRole("textbox")
     .fill("تست");
-  await page.getByRole("button", { name: "Select Options" }).click();
+  await page.getByRole('combobox', { name: 'Select an Option' }).click();
   await page.getByText("تیمی").click();
   await page.locator("bsu-ui-text-field input").nth(1).click();
   await page.locator("bsu-ui-text-field input").nth(1).fill("66");

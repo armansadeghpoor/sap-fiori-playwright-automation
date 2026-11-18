@@ -22,8 +22,9 @@ test("test", async ({ page, request }) => {
     .filter({ hasText: "نام:" })
     .getByRole("textbox")
     .fill("تست");
-  await page.getByRole('combobox', { name: 'انتخاب کنید' }).click();
-  await page.getByRole('button', { name: 'جدید', exact: true }).click();
+  // await page.getByRole('combobox', { name: 'انتخاب کنید' }).click();
+  await page.getByRole('combobox').click();
+  await page.getByRole('button', { name: 'جدید' }).click();
   await page.locator("label").filter({ hasText: "دکتری" }).click();
   await page.getByRole("button", { name: "select day" }).click();
   await page.waitForTimeout(1000);
@@ -41,10 +42,10 @@ test("test", async ({ page, request }) => {
   await page.waitForTimeout(1000);
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.getByRole("combobox", { name: "انتخاب کنید" }).click();
-  await page.getByRole("combobox", { name: "انتخاب کنید" }).fill("5");
+  await page.getByRole('combobox').click();
+  await page.getByRole('combobox').fill("5");
   await page.keyboard.press("Backspace");
-  await page.getByRole("combobox", { name: "انتخاب کنید" }).fill("5");
+  await page.getByRole('combobox').fill("5");
   await page.getByText("/04/24").click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await expect(

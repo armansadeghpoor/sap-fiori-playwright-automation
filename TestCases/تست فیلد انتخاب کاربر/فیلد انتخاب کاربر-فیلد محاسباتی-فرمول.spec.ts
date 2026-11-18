@@ -20,9 +20,9 @@ test("test", async ({ page, request }) => {
   await page.getByRole("button", { name: "جدید" }).click();
   await page.getByRole("textbox").nth(0).click();
   await page.getByRole("textbox").nth(0).fill("تست");
-  await page.getByRole("button", { name: "" }).click();
+  await page.locator('bsu-ui-container-with-button').getByRole('button').click();
   await expect(
     page.locator("bsu-ui-mo-info-combo-viewer").getByRole("textbox")
-  ).toHaveValue("راهبر سیستم");
+  ).toHaveValue("کارتابل");
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
 });

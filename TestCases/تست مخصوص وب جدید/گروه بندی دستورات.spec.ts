@@ -20,7 +20,7 @@ test('test', async ({ page }) => {
   await page.locator('a').filter({ hasText: 'گروه بندی دستور' }).click();
   await expect(page.locator('fd-dialog-body')).toContainText('گروه بندی دستور 3');
   await page.getByRole('button', { name: 'تایید' }).click();
-  await page.locator('span.fd-shellbar__button', { hasText: 'گروهبندی دستور 4' }).click();
+  await page.locator('span.fd-shellbar__button', { hasText: 'گروهبندی دستور 4' }).first().click();
   await expect(page.locator('fd-dialog-body')).toContainText('گروهبندی دستور 4');
   await page.getByRole('button', { name: 'تایید' }).click();
   await page.getByRole('button', { name: 'گروه 1' }).click();

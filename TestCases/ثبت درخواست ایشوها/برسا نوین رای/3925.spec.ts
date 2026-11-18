@@ -16,8 +16,8 @@ test('test', async ({ page }) => {
   await page.locator('li[data-name="ثبت درخواست ایشوها"] a').click();
   await page.getByRole('link', { name: '3925' }).last().click();
   await page.getByRole('button', { name: 'جزئیات' }).nth(0).click();
-  await expect(page.getByRole('cell', { name: 'عنوان: تست 1 تعداد: 1' })).toBeVisible();
+  await expect(page.getByRole('gridcell', { name: 'عنوان: تست 1 تعداد: 1' })).toBeVisible();
   await page.getByRole('button', { name: 'جزئیات' }).nth(0).click();
-  await expect(page.getByRole('cell', { name: 'عنوان: تست 2 تعداد: 2' })).toBeVisible();
+  await expect(page.getByRole('gridcell', { name: 'عنوان: تست 2 تعداد: 2' })).toBeVisible();
   await page.getByRole('button', { name: 'جزئیات' }).nth(0).click();
 });

@@ -14,16 +14,13 @@ test("test", async ({ page, request }) => {
   await page.getByRole("button", { name: "جدید" }).click();
   await page.getByRole("textbox").click();
   await page.getByRole("textbox").fill("313");
-  await page.getByRole("button", { name: "Select Options" }).click();
+  await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
   await page.getByText("پروژه").click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await page.waitForTimeout(1500);
   await page.getByRole("button", { name: "Navigation" }).click();
   await page.getByText("رابطه عکس تکی(لیستی)-انواع نمایش-واحد سازمانی").click();
-  await page
-    .getByRole("row", { name: "‫پروژه‬ " })
-    .getByRole("button")
-    .click();
+  await page.getByRole('link', { name: '‫پروژه‬' }).dblclick();
   await page.waitForTimeout(1000);
   await page
     .locator("bsu-barsa-row-inline-actionlist")

@@ -9,11 +9,12 @@ test("test", async ({ page }) => {
   await page.getByRole('button', { name: 'App Launcher' }).click();
   await page.getByText('تست مخصوص وب جدید', { exact: true }).click();
   await page.getByRole("link", { name: "تست نمای چندصفحه ای" }).click();
-  await page.getByRole("button", { name: "جدید" }).last().click();
+  await page.waitForTimeout(1000);
+  await page.getByRole('button', { name: 'جدید', exact: true }).click();
   await expect(page.getByRole("button", { name: "بیشتر" })).toBeVisible();
   await page.getByRole("button", { name: "بیشتر" }).click();
   await page
     .locator("fd-popover-body li a")
-    .getByText("درست/نادرسا default")
+    .getByText("فیلد نمایشگر گیج default")
     .click();
 });

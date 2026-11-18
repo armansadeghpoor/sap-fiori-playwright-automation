@@ -23,7 +23,6 @@ test('test', async ({ page }) => {
     - text: ‫تست 1‬
     `);
   await page.getByRole('link', { name: '‫*حذف نشود*‬' }).dblclick();
-  await page.getByRole('combobox', { name: 'انتخاب کنید' }).click();
   await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
   await expect(page.getByRole('option', { name: 'object icon تست 1' })).toBeVisible();
 });

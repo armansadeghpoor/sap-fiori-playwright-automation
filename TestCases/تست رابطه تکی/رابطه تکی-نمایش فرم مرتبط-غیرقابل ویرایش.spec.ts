@@ -18,7 +18,7 @@ test("test", async ({ page, request }) => {
     })
     .getByRole("combobox")
     .click();
-  await page.locator("#fd-input-group-button-id-1").click();
+  await page.locator('fd-input-group span').getByRole('button').nth(1).click();
   await page.getByText("بنفش").click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await page.getByRole('link', { name: '‫بنفش‬' }).dblclick();

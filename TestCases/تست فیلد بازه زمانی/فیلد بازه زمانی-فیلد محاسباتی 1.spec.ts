@@ -18,7 +18,7 @@ test("test", async ({ page, request }) => {
     .click();
   await page.getByText("فیلد بازه زمانی-محاسباتی").click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.getByRole("button", { name: "Select Options" }).click();
+  await page.locator('fd-input-group').getByRole('button').click();
   await page.getByText("کاربر1").click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await expect(page.locator("bsu-ui-table-view")).toContainText(

@@ -9,23 +9,14 @@ test("test", async ({ page }) => {
   await page.getByText("فیلد های رابطه ای").click();
   await page.getByText("رابطه عکس تکی لیستی").click();
   await page.getByText("رابطه عکس تکی(لیستی)-انواع نمایش-واحد سازمانی").click();
-  await page.getByRole("row", { name: "‫فروش‬ " }).getByRole("button").click();
-  await page
-    .getByRole("tab", {
-      name: "پرسنل حاضر در این واحد-نمایش در فرم مستقل-غیرقابل ویرایش default",
-    })
-    .click();
-  await page
-    .getByRole("row", { name: "‫‪32‬ ‫فروش‬ " })
-    .getByRole("button")
-    .click();
+  await page.getByRole('link', { name: '‫فروش‬' }).dblclick();
+await page.getByRole('button', { name: 'پرسنل حاضر در این واحد-نمایش در فرم مستقل-غیرقابل ویرایش' }).click();
+  // await page
+  //   .getByRole("row", { name: "‫‪32‬ ‫فروش‬ " })
+  //   .getByRole("button")
+  //   .click();
+  
+  await page.locator('#cdk-overlay-1').getByRole('link', { name: '‫‪32‬' }).dblclick();
   await page.waitForTimeout(1000);
-  await page.getByRole("button", { name: "" }).click();
-  await expect(
-    page
-      .locator("div")
-      .filter({ hasText: "شماره پرسنلی:‪87واحد مربوطه:" })
-      .nth(3)
-  ).toBeVisible();
-  await page.getByTitle('Close').click();
+  await expect(page.locator('bsu-ly-layout-container-of-root').filter({ hasText: 'شماره پرسنلی:‪32واحد مربوطه:' })).toBeVisible();
 });

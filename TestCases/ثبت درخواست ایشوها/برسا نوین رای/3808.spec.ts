@@ -18,7 +18,8 @@ test("test", async ({ page }) => {
   const downloadBtn = page.locator('fd-button-bar[glyph="download"] button');
   await expect(downloadBtn).toBeVisible();
   const resizeBtn = page.locator('fd-button-bar[glyph="resize"] button');
-  await expect(resizeBtn).toBeVisible();
+  await resizeBtn.click();
+  await page.getByRole('button', { name: 'close', exact: true }).click();
   await page.getByRole('button', { name: 'دانلود' }).click();
   await expect(page.getByText(".zip")).toBeVisible();
   await expect(page.getByText('دانلودهمه')).toBeVisible();

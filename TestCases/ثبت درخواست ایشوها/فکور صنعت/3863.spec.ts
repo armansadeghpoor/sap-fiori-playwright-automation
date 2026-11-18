@@ -22,9 +22,10 @@ test('test', async ({ page, request }) => {
   await page.getByTitle('ویرایش در لیست', { exact: true }).click();
   await page.waitForTimeout(500);
   await page.getByTitle('ویرایش در لیست', { exact: true }).click();
-  await page.getByRole('cell', { name: '45' }).getByRole('textbox').click();
-  await page.getByRole('cell', { name: '45' }).getByRole('textbox').fill('45,1111');
-    await page.waitForTimeout(500);
+  await page.getByRole('gridcell', { name: '45' }).getByRole('textbox').click();
+  await page.getByRole('gridcell', { name: '45' }).getByRole('textbox').fill('45,1111');
+  await page.getByRole('gridcell', { name: '451,111' }).getByRole('textbox').press('Enter');
+  await page.waitForTimeout(500);
   await page.getByRole('button', { name: 'ذخیره و بستن' }).click();
   await page.locator('fd-dialog').click();
   await page.getByRole('button', { name: 'تایید' }).click();

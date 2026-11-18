@@ -14,10 +14,7 @@ test("test", async ({ page, request }) => {
     .getByText("رابطه عکس تکی(تکی)-نمایش چند انتخابی رادیویی-تجهیزات")
     .click();
   await expect(page.locator("tbody")).toContainText("‫کلاس2‬");
-  await page
-    .getByRole("row", { name: "‫دفتر4‬ ‫کلاس2‬ " })
-    .getByRole("button")
-    .click();
+  await page.getByRole('link', { name: '‫دفتر4‬' }).dblclick();
   await page.locator("label").filter({ hasText: "کلاس3" }).click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await expect(page.locator("tbody")).toContainText("‫کلاس3‬");

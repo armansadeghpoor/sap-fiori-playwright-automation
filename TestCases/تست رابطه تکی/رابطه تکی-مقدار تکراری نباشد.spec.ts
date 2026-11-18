@@ -14,11 +14,12 @@ test("test", async ({ page, request }) => {
     .getByText("رابطه تکی-انواع تنظیمات-کالاهای موجود در انبار")
     .click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.locator("#fd-input-group-button-id-0").click();
+  await page.locator('fd-input-group span').getByRole('button').first().click();
   await page.getByText("12").click();
   await page.getByRole("button", { name: "More actions" }).click();
   await page.getByText("ذخیره و جدید").click();
-  await page.locator("#fd-input-group-button-id-3").click();
+  await page.waitForTimeout(500);
+  await page.locator('fd-input-group span').getByRole('button').first().click();
   await page.getByText("12").click();
   await page.waitForTimeout(700);
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();

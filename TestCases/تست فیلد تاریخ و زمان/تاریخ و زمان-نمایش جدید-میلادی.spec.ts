@@ -13,13 +13,15 @@ test("test", async ({ page, request }) => {
   await page.getByText("تاریخ و زمان-نمایش جدید-میلادی").click();
   await page.getByRole("button", { name: "جدید" }).click();
   await page.getByRole("button", { name: "select day" }).click();
-
   await page.locator("fd-toolbar div").getByRole("button").nth(3).click(); //   await page.getByRole("button", { name: "2025" }).click();
-  await page.getByRole("button", { name: "" }).click();
-  await page.getByRole("button", { name: "" }).click();
+  await page.waitForTimeout(500);
+  await page.locator('fd-toolbar').getByRole('button').nth(4).click();
+  await page.waitForTimeout(500);
+  await page.locator('fd-toolbar').getByRole('button').nth(4).click();
+  await page.waitForTimeout(500);
   await page.getByRole("button", { name: "2004" }).click();
-
   await page.locator("fd-toolbar").getByRole("button").nth(6).click(); //   await page.getByRole("button", { name: "September" }).click();
+  await page.getByRole('button', { name: '2004', description: 'Default Action' }).click();
   await page.getByRole("button", { name: "February" }).click();
   await page.getByRole("button", { name: "8", exact: true }).click();
   await page.getByRole("spinbutton").nth(1).click();

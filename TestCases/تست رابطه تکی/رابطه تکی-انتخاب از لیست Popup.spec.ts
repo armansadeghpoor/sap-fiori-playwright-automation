@@ -14,7 +14,8 @@ test("test", async ({ page, request }) => {
     .getByText("رابطه تکی-نمایش از دکمه جدید و انتتخاب از لیست Popup")
     .click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.getByRole('combobox', { name: 'انتخاب کنید' }).last().click();
+  await page.locator('fd-input-group input').last().click();
+  await page.getByRole('button', { name: 'جستجو' }).click();
   await page.getByRole('button', { name: 'جستجو' }).click();
   await page.getByText("‫زرد32‬").click();
   await page.getByRole("button", { name: "تایید" }).click();

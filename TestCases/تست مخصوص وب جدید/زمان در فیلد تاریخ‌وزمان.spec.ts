@@ -30,7 +30,8 @@ test("زمان در فیلد تاریخ‌وزمان", async ({ page, request })
   await page.getByRole('button', { name: 'select time' }).click();
   await page.getByText('00:30').click();
   await page.getByRole('button', { name: 'ذخیره و بستن' }).click();
-  await page.getByRole('link', { name: '‫1405/08/17 12:30 ق.ظ‬' }).dblclick();
+  // await page.getByRole('link', { name: '‫1405/08/17 12:30 ق.ظ‬' }).dblclick();
+  await page.locator('bsu-barsa-row-inline-actionlist').getByRole('button').click();
   await page.getByRole('combobox', { name: 'HH:mm' }).click();
   await page.getByRole('combobox', { name: 'HH:mm' }).fill('00:50');
   await page.getByRole('button', { name: 'ذخیره و بستن' }).click();

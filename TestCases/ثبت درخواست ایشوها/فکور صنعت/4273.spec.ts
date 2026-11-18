@@ -26,10 +26,8 @@ test("4273", async ({ page }) => {
     name: "تنظیمات",
   }).click();
 
-  await page.getByRole("combobox", {
-    name: "Select an Option",
-    description: "sap_fiori_3",
-  }).click();
+
+  await page.getByRole('combobox', { name: 'Select an Option', description: 'sap_horizon' }).click();
 
   await page.getByRole("option", {
     name: "sap_fiori_3_dark",

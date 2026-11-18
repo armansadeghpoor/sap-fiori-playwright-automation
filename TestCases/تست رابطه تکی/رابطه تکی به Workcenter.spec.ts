@@ -14,7 +14,6 @@ test("test", async ({ page, request }) => {
   await page.getByRole("button", { name: "جدید" }).click();
   await page.getByRole("textbox").click();
   await page.getByRole("textbox").fill("تست");
-  await page.getByRole("combobox", { name: "انتخاب کنید" }).click();
   await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
   await page.getByText("کارشناس ارشد نرم افزار").click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();

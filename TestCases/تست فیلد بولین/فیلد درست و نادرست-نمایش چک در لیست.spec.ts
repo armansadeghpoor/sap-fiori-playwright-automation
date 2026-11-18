@@ -28,7 +28,7 @@ test("test", async ({ page }) => {
   await page.getByText("درست/نادرست-انواع نمایش").click();
   await page.getByRole("button", { name: "جدید" }).click();
   await page.locator('span:has(.sap-icon--slim-arrow-down)').last().click();
-  await expect(page.locator('span').filter({ hasText: /^نادرست$/ }).nth(1)).toBeVisible();
+  await expect(page.getByRole('option', { name: 'نادرست' })).toBeVisible();
   await page.getByText("درست", { exact: true }).click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
 });

@@ -20,7 +20,7 @@ test('test', async ({ page, request }) => {
   await page.getByRole('link', { name: '3989' }).last().click();
   await page.getByRole('link', { name: '‫*حذف نشود*‬' }).dblclick();
   await expect(page.locator('#LayoutItem_7 fd-dynamic-page-content')).toBeVisible();
-  await expect(page.locator('fdp-icon-tab-bar-tab-content')).toContainText('جدید بولین درست نادرست درست نادرست');
+  await expect(page.locator('bsu-ui-table-view')).toContainText('بولین درست جزئیات نادرست جزئیات درست جزئیات نادرست جزئیات');
   await page.locator('a').filter({ hasText: 'نادرست' }).nth(1).click();
   await page.locator('fd-checkbox[title="بولین"] label').click();
   await page.getByTitle('ویرایش در لیست', { exact: true }).click();

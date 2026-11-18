@@ -14,6 +14,7 @@ test.use({
 test('test', async ({ page, request }) => {
   await restoreSnapshot(request);
   await loginAs(page, users.rahbar);
+  await page.waitForTimeout(4000);  
   await page.getByRole('heading', { name: 'مدیریت نوتیفیکیشن' }).click();
   const notifBadge = page.getByLabel('Notification Label');
   await page.waitForTimeout(4000);

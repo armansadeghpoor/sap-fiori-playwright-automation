@@ -11,6 +11,7 @@ test("test", async ({ page }) => {
   await page
     .getByRole("link", { name: "قاعده کاری در نمایش تب و صفحه" })
     .click();
+  await page.waitForTimeout(700);
   await page.getByRole("button", { name: "جدید" }).last().click();
   await expect(page.getByText("توضیحات:")).toBeVisible();
   await page.getByRole("textbox").last().click();

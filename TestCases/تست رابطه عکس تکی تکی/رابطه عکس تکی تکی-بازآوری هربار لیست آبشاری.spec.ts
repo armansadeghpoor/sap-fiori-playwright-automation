@@ -15,15 +15,16 @@ test("test", async ({ page, request }) => {
       "رابطه عکس تکی تکی-بلیط--نمای مرتبط-مقدار خالی نباشد-بازآوری هر بار لیست آبشاری"
     )
     .click();
-  await page.getByRole("button", { name: "" }).click();
-  await page.getByRole("button", { name: "" }).click();
+  await page.getByRole('link', { name: '‫شیما‬' }).dblclick();
+  await page.getByRole('combobox').click();
+  await page.getByRole('button', { name: 'ویرایش' }).click();
   await page.getByRole("textbox", { name: "شیما" }).click();
   await page.getByRole("textbox", { name: "شیما" }).fill("شیما تست");
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await page.waitForTimeout(1000);
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.getByRole("button", { name: "Select Options" }).click();
+  await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
   await page.getByText("شیما تست").click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await expect(page.locator("tbody")).toContainText("‫شیما تست‬");

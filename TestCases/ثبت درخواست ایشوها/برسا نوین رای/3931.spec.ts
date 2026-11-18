@@ -18,12 +18,20 @@ test('test', async ({ page }) => {
   await page.getByTitle('Close').click();
   await page.getByTitle('گردش کار').click();
   await page.locator('bsu-ui-table-view').click();
-  await expect(page.getByRole('cell', { name: '‫نمایش فرم‬' }).nth(1)).toHaveCSS('color', 'rgb(19, 30, 41)');
+  await expect(
+    page.getByRole('gridcell', { name: 'نمایش فرم' }).nth(1)
+  ).toHaveCSS('color', 'rgb(19, 30, 41)');
+
   await page.locator('.fd-avatar__icon').click();
   await page.getByRole('menuitem', { name: 'تنظیمات' }).click();
   await page.locator('span:has(.sap-icon--slim-arrow-down)').first().click();
   await page.getByText('sap_fiori_3_dark').click();
   await page.getByRole('button', { name: 'ذخیره و بستن' }).click();
   await page.reload();
-  await expect(page.getByRole('cell', { name: '‫نمایش فرم‬' }).nth(1)).toHaveCSS('color', 'rgb(0, 0, 0)');
+  await page.getByRole('button', { name: 'Close' }).click();
+  await page.getByRole('link', { name: '‫رحمتیرحمتیرحرحمتیرحمتیرحمتیمتی‬' }).click();
+  await page.getByRole('button', { name: 'گردش کار' }).click();
+  await expect(
+    page.getByRole('gridcell', { name: 'نمایش فرم' }).nth(1)
+  ).toHaveCSS('color', 'rgb(0, 0, 0)');
 });

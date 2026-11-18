@@ -17,7 +17,7 @@ test('test', async ({ page }) => {
   await page.getByRole('link', { name: 'کارتابل وارده تفکیکی' }).click();
   await page.getByText('تمامی سمتهای من').click();
   await page.waitForTimeout(2000);
-  await page.getByRole('button', { name: 'تنظیمات' }).click();
+  await page.getByRole('button', { name: 'تنظیمات' }).last().click();
   await page.locator('.sap-icon.sap-icon--checklist').click();
   await page.getByRole('option', { name: 'موضوع: *حذف نشود3*' }).locator('label').click();
   await expect(page.getByRole('button', { name: 'undefined' })).toBeVisible();

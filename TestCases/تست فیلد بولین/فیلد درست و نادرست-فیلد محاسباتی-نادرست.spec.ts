@@ -13,5 +13,5 @@ test("test", async ({ page, request }) => {
   await page.getByText("درست/نادرست-فیلد محاسباتی").click();
   await page.getByRole("button", { name: "جدید" }).click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
-  await expect(page.getByRole("cell", { name: "نادرست" })).toBeVisible();
+  await expect(page.getByRole("gridcell", { name: "نادرست" })).toBeVisible();
 });

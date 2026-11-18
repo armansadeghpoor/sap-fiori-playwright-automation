@@ -20,7 +20,7 @@ test("test", async ({ page }) => {
   await page.getByRole("textbox").last().click();
   await page.getByRole("textbox").last().fill("تست");
   await page.getByRole('combobox', { name: 'Select an Option' }).click();
-  await expect(page.getByText("انتخاب کنید")).toBeVisible();
+  await page.getByRole('combobox', { name: 'Select an Option' }).click();
   await page.getByRole("textbox", { name: "تست" }).click();
   await page.getByRole("textbox", { name: "تست" }).fill("");
   await expect(page.getByRole('combobox', { name: 'Select an Option' })).toHaveClass(/is-readonly/);

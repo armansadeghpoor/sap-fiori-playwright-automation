@@ -16,8 +16,8 @@ test("test", async ({ page, request }) => {
   await page.locator('#cdk-overlay-1').getByText('ثبت درخواست ایشوها').click();
   await page.getByRole('link', { name: '4069' }).last().click();
   await page.getByRole('button', { name: 'جدید' }).click();
-  await page.getByRole('combobox', { name: 'انتخاب کنید' }).click();
-  await page.getByLabel('جستجو').click();
+  await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
+  await page.getByLabel('جستجو').last().click();
   await page.locator('button.fd-list__button:has(.sap-icon--slim-arrow-left)').first().click();
   await page.waitForTimeout(500);
   await page.locator('button.fd-list__button:has(.sap-icon--slim-arrow-left)').first().click();
@@ -27,12 +27,11 @@ test("test", async ({ page, request }) => {
   await page.locator('button.fd-list__button:has(.sap-icon--slim-arrow-left)').first().click();
   await page.waitForTimeout(500);
   await expect(page.locator('bsu-ui-tree')).toContainText('تست 1تست 1.1تست 1.1.1تست 1.2تست 2تست 2.1تست 2.2تست 2.2.1تست 3');
-  await page.getByRole('button', { name: 'close' }).last().click();
-  await page.getByRole('combobox', { name: 'انتخاب کنید' }).click();
+  await page.getByRole('button', { name: 'close' }).nth(1).click();
   await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
   await expect(page.locator('fd-layout-grid')).toContainText('عنوان:رابطه تکی-گزارش از نوع سلسله مراتبی: 3 result list items');
-  await page.getByRole('combobox', { name: 'انتخاب کنید' }).click();
-  await page.getByLabel('جستجو').click();
+  await page.getByRole('button', { name: 'navigation-down-arrow' }).click();
+  await page.getByLabel('جستجو').last().click();
   await page.locator('button.fd-list__button:has(.sap-icon--slim-arrow-left)').first().click();
   await page.waitForTimeout(500);
   await page.locator('button.fd-list__button:has(.sap-icon--slim-arrow-left)').first().click();
@@ -41,6 +40,6 @@ test("test", async ({ page, request }) => {
   await page.getByRole('button', { name: 'تایید' }).click();
   await page.getByRole('button', { name: 'ذخیره و بستن' }).click();
   await page.getByRole('link', { name: '‫تست 1.1.1‬' }).dblclick();
-  await expect(page.getByRole('combobox', { name: 'انتخاب کنید' })).toHaveValue('تست 1.1.1');
+  await expect(page.getByRole('combobox')).toHaveValue('تست 1.1.1');
 
 });

@@ -19,5 +19,5 @@ test("test", async ({ page, request }) => {
   await page.getByText("فیلد بازه زمانی-محاسباتی").click();
   await page.getByRole("button", { name: "جدید" }).click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
-  await expect(page.getByRole("cell", { name: "‫19:26‬" })).toBeVisible();
+  await expect(page.getByRole("gridcell", { name: "‫19:26‬" })).toBeVisible();
 });

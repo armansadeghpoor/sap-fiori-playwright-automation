@@ -16,7 +16,7 @@ test("test", async ({ page, request }) => {
     .nth(2)
     .click();
   await page.getByRole("button", { name: "جدید" }).click();
-  await page.locator("#fd-input-group-button-id-1").click();
+  await page.locator('fd-input-group span').getByRole('button').nth(1).click();
   await page.locator("li").getByText("صورتی").click();
   await page.getByRole("button", { name: "ذخیره و بستن" }).click();
   await expect(page.locator("bsu-barsa-table-row")).toContainText("‫صورتی‬");
