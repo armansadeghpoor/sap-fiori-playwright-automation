@@ -6,6 +6,8 @@ node_modules/
 /playwright/.cache/
 /.playwright-studio/
 # Security and Session data
+.env.*
+!.env.example
 .env
 localstorage.json
 *.log
@@ -14,3 +16,4 @@ localstorage.json
 *.docx
 *.pdf
 *.png
+/playwright/.auth/
